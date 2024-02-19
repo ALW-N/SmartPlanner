@@ -1,36 +1,46 @@
-
 import React, { useState } from 'react';
+import { View, Text, TextInput, Button } from 'react-native';
 
-const Login = () => {
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+  const handleEmailChange = (text) => {
+    setEmail(text);
   };
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
+  const handlePasswordChange = (text) => {
+    setPassword(text);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     // Add your login logic here
+    console.log('Login button pressed');
+    navigation.navigate('Home')
+    
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Email:</label>
-        <input type="email" value={email} onChange={handleEmailChange} />
+    <View>
+      <Text>Login</Text>
+      <View>
+        <Text>Email:</Text>
+        <TextInput
+          value={email}
+          onChangeText={handleEmailChange}
+          keyboardType="email-address"
+        />
 
-        <label>Password:</label>
-        <input type="password" value={password} onChange={handlePasswordChange} />
+        <Text>Password:</Text>
+        <TextInput
+          value={password}
+          onChangeText={handlePasswordChange}
+          secureTextEntry={true}
+        />
 
-        <button type="submit">Login</button>
-      </form>
-    </div>
+        <Button title="Login" onPress={handleSubmit} />
+      </View>
+    </View>
   );
 };
 

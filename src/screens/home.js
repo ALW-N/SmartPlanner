@@ -20,7 +20,7 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <View style={styles.topBar}>
         <View style={styles.profileContainer}>
-          <Image source={require('G:/CHRIST-MCA/MCA-3/Software Project Development-2/SmartPlanner/src/assets/profile.png')} style={styles.profilePhoto} />
+          <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>John Doe</Text>
             <Text style={styles.date}>September 20, 2022</Text>
