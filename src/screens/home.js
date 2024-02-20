@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faCalendarAlt, faTasks, faUser } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
+import { faBell } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   // Dummy percentage value for testing
   const percentage = 75;
 
@@ -38,18 +38,6 @@ const HomeScreen = () => {
           <View style={[styles.percentageIndicator, { backgroundColor: percentage >= 90 ? 'green' : 'red' }]} />
           <Text style={styles.percentageText}>{percentage}%</Text>
         </View>
-      </View>
-      {/* Add individual tasks here */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.bottomBarButton}>
-          <FontAwesomeIcon icon={faCalendarAlt} style={styles.bottomBarButtonIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomBarButton}>
-          <FontAwesomeIcon icon={faTasks} style={styles.bottomBarButtonIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomBarButton}>
-          <FontAwesomeIcon icon={faUser} style={styles.bottomBarButtonIcon} />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -125,24 +113,6 @@ const styles = {
   percentageText: {
     color: 'white',
     marginLeft: 10,
-  },
-  bottomBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'absolute', // Add this to position the bottomBar at the bottom
-    bottom: 0, // Add this to position the bottomBar at the bottom
-    width: '120%', // Add this to stretch the bottomBar across the screen
-    paddingHorizontal: 70, // Add this for some padding on both sides
-    backgroundColor: 'blue', // Add this to give a background color to the bottomBar
-  },
-  bottomBarButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  bottomBarButtonIcon: {
-    color: 'white',
   },
 };
 
