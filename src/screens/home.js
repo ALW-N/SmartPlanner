@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.profileContainer}>
           <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>John Doe</Text>
+            <Text style={styles.userName}>Alwin Tomy</Text>
             <Text style={styles.date}>September 20, 2022</Text>
           </View>
         </View>
@@ -47,7 +47,7 @@ const styles = {
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'space-between', // Add this to position the bottomBar at the bottom
+    justifyContent: 'space-between', 
   },
   topBar: {
     flexDirection: 'row',
@@ -60,8 +60,8 @@ const styles = {
     alignItems: 'center',
   },
   profileInfo: {
-    flexDirection: 'column', // Change to column layout
-    marginLeft: 10, // Add
+    flexDirection: 'column', 
+    marginLeft: 10,
   },
   profilePhoto: {
     width: 40,
@@ -91,9 +91,9 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 600, // Add marginBottom
-    marginRight: 20, // Add marginRight
-    marginLeft: 20, // Add marginLeft
+    marginBottom: 600, 
+    marginRight: 20, 
+    marginLeft: 20, 
   },
   statusText: {
     color: 'white',

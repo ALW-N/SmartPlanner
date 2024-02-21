@@ -44,6 +44,7 @@ export default function App() {
           inactiveTintColor: 'gray',
         }}
       >
+
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Task" component={Task} />
         <Tab.Screen name="Profile" component={Profile} />

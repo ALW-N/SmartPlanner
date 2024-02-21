@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { View, Text, TextInput, Button, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import CheckBox from '@react-native-community/checkbox';
 
 const TaskScreen = ({ route }) => {
   // Extract the selected date from the route parameters
@@ -68,7 +67,7 @@ const TaskScreen = ({ route }) => {
       <View style={{ marginTop: 20 }}>
         {tasks.map((task, index) => (
           <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <CheckBox
+            <Switch
               value={task.completed}
               onValueChange={() => handleTaskCompleted(index)}
             />
