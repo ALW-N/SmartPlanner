@@ -1,23 +1,69 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
+import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
 
 const HomeScreen = ({ navigation, route }) => {
-  // Extract the selected date from the route parameters or provide a default value
-  const selectedDate = route?.params?.selectedDate || 'No Date Selected';
+  // State to hold the current date
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Dummy percentage value for testing
-  const percentage = 75;
-
-  // Function to determine the text based on the percentage
-  const getText = () => {
-    if (percentage >= 90) {
-      return "Your daily tasks are almost done";
-    } else {
-      return "Complete your tasks";
-    }
+  // Function to format date to display
+  const formatDate = (date) => {
+    const options = { weekday: 'short' };
+    return date.toLocaleDateString('en-US', options);
   };
+
+  // Function to format the month and year
+  const formatMonthYear = (date) => {
+    const options = { month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  // Function to update current date
+  const updateCurrentDate = (newDate) => {
+    setCurrentDate(newDate);
+    setIsModalVisible(false); // Close the modal after selecting a month
+  };
+
+  // Effect to update current date at midnight
+  useEffect(() => {
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const timeUntilMidnight = midnight.getTime() - Date.now();
+    const timer = setTimeout(() => {
+      updateCurrentDate(new Date());
+    }, timeUntilMidnight);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Function to get an array of dates starting from today
+  const getCalendarDates = () => {
+    const today = new Date(currentDate);
+    const currentMonth = today.getMonth();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(currentMonth + 1);
+
+    const calendarDates = [];
+    let date = new Date(today);
+    while (date.getMonth() === currentMonth) {
+      calendarDates.push(new Date(date));
+      date.setDate(date.getDate() + 1);
+    }
+
+    // Add a plus sign for the next month
+    calendarDates.push('+');
+
+    return calendarDates;
+  };
+
+  // Generate an array of month names
+  const monthNames = Array.from({ length: 12 }, (_, index) => {
+    return {
+      label: formatMonthYear(new Date(currentDate.getFullYear(), index, 1)),
+      value: index,
+    };
+  });
 
   return (
     <View style={styles.container}>
@@ -26,23 +72,71 @@ const HomeScreen = ({ navigation, route }) => {
           <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>Alwin Tomy</Text>
-            {/* Display the selectedDate */}
-            <Text style={styles.date}>{selectedDate}</Text> 
+            {/* Display the current date */}
+            <Text style={styles.date}>{currentDate.toDateString()}</Text> 
           </View>
         </View>
         <TouchableOpacity style={styles.notificationButton}>
           <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
         </TouchableOpacity>
       </View>
-      <View style={styles.statusTextContainer}>
-        <Text style={styles.statusText}>
-          {getText()}
-        </Text>
-        <View style={styles.percentageContainer}>
-          <View style={[styles.percentageIndicator, { backgroundColor: percentage >= 90 ? 'green' : 'red' }]} />
-          <Text style={styles.percentageText}>{percentage}%</Text>
+      {/* Month and year */}
+      <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+        <View style={styles.monthYearContainer}>
+          <Text style={styles.monthYearText}>{formatMonthYear(currentDate)}</Text>
+          <FontAwesomeIcon icon={faChevronRight} style={styles.arrowIcon} />
         </View>
-      </View>
+      </TouchableOpacity>
+      {/* Month picker modal */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsModalVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <ScrollView>
+                {monthNames.map((month, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => updateCurrentDate(new Date(currentDate.getFullYear(), month.value, 1))}
+                    style={styles.monthButton}>
+                    <Text>{month.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      {/* Calendar Agenda */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.calendarContainer}>
+        {getCalendarDates().map((date, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.calendarBox}
+            onPress={() => {
+              if (date === '+') {
+                updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+              }
+            }}>
+            {date === '+' ? (
+              <Text style={styles.nextMonthIndicator}>+</Text>
+            ) : (
+              <>
+                <Text style={styles.calendarDay}>{formatDate(date)}</Text>
+                <Text style={styles.calendarDate}>
+                  {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -51,7 +145,6 @@ const styles = {
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'space-between',
   },
   topBar: {
     flexDirection: 'row',
@@ -87,33 +180,59 @@ const styles = {
     width: 20,
     height: 20,
   },
-  statusTextContainer: {
-    backgroundColor: 'black',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+  monthYearContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  monthYearText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8, 
+  },
+  arrowIcon: {
+    fontSize: 20,
+    color: 'black',
+  },
+  calendarContainer: {
+    alignItems: 'flex-start',
+  },
+  calendarBox: {
+    backgroundColor: '#00FF00',
+    padding: 15,
+    marginRight: 10,
+    borderRadius: 5,
     alignItems: 'center',
   },
-  statusText: {
-    color: 'white',
+  calendarDay: {
+    fontSize: 12,
+  },
+  calendarDate: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  percentageContainer: {
-    flexDirection: 'row',
+  nextMonthIndicator: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  percentageIndicator: {
-    width: 20,
-    height: 20,
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
     borderRadius: 10,
-    marginRight: 10,
+    elevation: 5,
+    maxHeight: 500,
+    width: "80%", 
   },
-  percentageText: {
-    color: 'white',
-    marginLeft: 10,
+  monthButton: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 };
 

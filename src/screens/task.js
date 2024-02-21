@@ -1,9 +1,8 @@
-// src/screens/task.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-const TaskScreen = ({ route }) => {
+const TaskScreen = ({ route, navigation }) => {
   // Extract the selected date from the route parameters
   const { selectedDate } = route.params || { selectedDate: 'Your default date here' };
 
@@ -30,9 +29,13 @@ const TaskScreen = ({ route }) => {
   const handleAddTask = () => {
     if (taskInput.trim() !== '') {
       // Add the task with category and status to the tasks list
-      setTasks([...tasks, { category: selectedCategory, task: taskInput, completed: false }]);
+      const newTask = { category: selectedCategory, task: taskInput, completed: false };
+      setTasks([...tasks, newTask]);
       // Clear the task input field
       setTaskInput('');
+      
+      // Navigate back to HomeScreen and pass the updated tasks data
+      navigation.navigate('Home', { tasks: [...tasks, newTask], selectedDate });
     }
   };
 
