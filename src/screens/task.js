@@ -1,10 +1,11 @@
+// src/screens/task.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 const TaskScreen = ({ route }) => {
   // Extract the selected date from the route parameters
-  const { selectedDate } = route.params;
+  const { selectedDate } = route.params || { selectedDate: 'Your default date here' };
 
   // State to manage tasks for the selected date
   const [tasks, setTasks] = useState([]);

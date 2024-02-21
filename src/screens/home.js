@@ -3,7 +3,10 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
+  // Extract the selected date from the route parameters or provide a default value
+  const selectedDate = route?.params?.selectedDate || 'No Date Selected';
+
   // Dummy percentage value for testing
   const percentage = 75;
 
@@ -23,7 +26,8 @@ const HomeScreen = ({ navigation }) => {
           <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>Alwin Tomy</Text>
-            <Text style={styles.date}>September 20, 2022</Text>
+            {/* Display the selectedDate */}
+            <Text style={styles.date}>{selectedDate}</Text> 
           </View>
         </View>
         <TouchableOpacity style={styles.notificationButton}>
@@ -47,7 +51,7 @@ const styles = {
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'space-between', 
+    justifyContent: 'space-between',
   },
   topBar: {
     flexDirection: 'row',
@@ -91,9 +95,6 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 600, 
-    marginRight: 20, 
-    marginLeft: 20, 
   },
   statusText: {
     color: 'white',

@@ -1,4 +1,3 @@
-// App.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -24,7 +23,7 @@ export default function App() {
               case 'Home':
                 icon = <FontAwesomeIcon icon={faHome} size={size} style={{ color }} />;
                 break;
-              case 'Tasks':
+              case 'Task':
                 icon = <FontAwesomeIcon icon={faTasks} size={size} style={{ color }} />;
                 break;
               case 'Profile':
@@ -39,12 +38,8 @@ export default function App() {
             return icon;
           },
         })}
-        tabBarOptions={{
-          activeTintColor: 'blue',
-          inactiveTintColor: 'gray',
-        }}
+        tabBarOptions={null} // Set tabBarOptions to null
       >
-
         <Tab.Screen name="Home" component={Home} />
         <Tab.Screen name="Task" component={Task} />
         <Tab.Screen name="Profile" component={Profile} />
