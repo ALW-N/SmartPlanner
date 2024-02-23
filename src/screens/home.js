@@ -4,29 +4,25 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
 
 const HomeScreen = ({ navigation, route }) => {
-  // State to hold the current date
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [tasks, setTasks] = useState([]);
 
-  // Function to format date to display
   const formatDate = (date) => {
     const options = { weekday: 'short' };
     return date.toLocaleDateString('en-US', options);
   };
 
-  // Function to format the month and year
   const formatMonthYear = (date) => {
     const options = { month: 'long', year: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
 
-  // Function to update current date
   const updateCurrentDate = (newDate) => {
     setCurrentDate(newDate);
-    setIsModalVisible(false); // Close the modal after selecting a month
+    setIsModalVisible(false);
   };
 
-  // Effect to update current date at midnight
   useEffect(() => {
     const midnight = new Date();
     midnight.setHours(24, 0, 0, 0);
@@ -37,7 +33,13 @@ const HomeScreen = ({ navigation, route }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Function to get an array of dates starting from today
+  useEffect(() => {
+    const { newTask } = route.params || {};
+    if (newTask) {
+      setTasks([...tasks, newTask]);
+    }
+  }, [route.params]);
+
   const getCalendarDates = () => {
     const today = new Date(currentDate);
     const currentMonth = today.getMonth();
@@ -51,13 +53,11 @@ const HomeScreen = ({ navigation, route }) => {
       date.setDate(date.getDate() + 1);
     }
 
-    // Add a plus sign for the next month
     calendarDates.push('+');
 
     return calendarDates;
   };
 
-  // Generate an array of month names
   const monthNames = Array.from({ length: 12 }, (_, index) => {
     return {
       label: formatMonthYear(new Date(currentDate.getFullYear(), index, 1)),
@@ -72,7 +72,6 @@ const HomeScreen = ({ navigation, route }) => {
           <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>Alwin Tomy</Text>
-            {/* Display the current date */}
             <Text style={styles.date}>{currentDate.toDateString()}</Text> 
           </View>
         </View>
@@ -80,14 +79,12 @@ const HomeScreen = ({ navigation, route }) => {
           <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
         </TouchableOpacity>
       </View>
-      {/* Month and year */}
       <TouchableOpacity onPress={() => setIsModalVisible(true)}>
         <View style={styles.monthYearContainer}>
           <Text style={styles.monthYearText}>{formatMonthYear(currentDate)}</Text>
           <FontAwesomeIcon icon={faChevronRight} style={styles.arrowIcon} />
         </View>
       </TouchableOpacity>
-      {/* Month picker modal */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -110,7 +107,6 @@ const HomeScreen = ({ navigation, route }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      {/* Calendar Agenda */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -137,6 +133,17 @@ const HomeScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <View style={styles.tasksContainer}>
+        <Text style={styles.tasksTitle}>Tasks:</Text>
+        {tasks.map((task, index) => (
+          <View key={index} style={styles.taskCard}>
+            <Text style={styles.taskName}>{task.name}</Text>
+            <Text style={styles.taskCategory}>{task.category}</Text>
+            <Text style={styles.taskDescription}>{task.description}</Text>
+            <Text style={styles.taskTime}>{task.time.toString()}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
@@ -233,6 +240,38 @@ const styles = {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  tasksContainer: {
+    marginTop: 20,
+  },
+  tasksTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  taskCard: {
+    backgroundColor: '#e0e0e0',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  taskName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  taskCategory: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginBottom: 5,
+  },
+  taskDescription: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  taskTime: {
+    fontSize: 12,
+    color: 'gray',
   },
 };
 

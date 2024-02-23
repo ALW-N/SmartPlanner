@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Switch } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { View, Text, Switch, StyleSheet, TouchableOpacity } from 'react-native';
 
 const TaskScreen = ({ route, navigation }) => {
   // Extract the selected date from the route parameters
@@ -8,36 +7,6 @@ const TaskScreen = ({ route, navigation }) => {
 
   // State to manage tasks for the selected date
   const [tasks, setTasks] = useState([]);
-  
-  // State to manage the current task input
-  const [taskInput, setTaskInput] = useState('');
-
-  // State to manage the selected category
-  const [selectedCategory, setSelectedCategory] = useState('Studies');
-
-  // Function to handle task input change
-  const handleTaskInputChange = (text) => {
-    setTaskInput(text);
-  };
-
-  // Function to handle category change
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-  };
-
-  // Function to handle adding a task
-  const handleAddTask = () => {
-    if (taskInput.trim() !== '') {
-      // Add the task with category and status to the tasks list
-      const newTask = { category: selectedCategory, task: taskInput, completed: false };
-      setTasks([...tasks, newTask]);
-      // Clear the task input field
-      setTaskInput('');
-      
-      // Navigate back to HomeScreen and pass the updated tasks data
-      navigation.navigate('Home', { tasks: [...tasks, newTask], selectedDate });
-    }
-  };
 
   // Function to handle marking a task as completed
   const handleTaskCompleted = (index) => {
@@ -46,43 +15,67 @@ const TaskScreen = ({ route, navigation }) => {
     setTasks(updatedTasks);
   };
 
+  // Define categories and their respective colors
+  const categories = [
+    { name: 'Academics/Profession', color: '#ffcc00' },
+    { name: 'Personal', color: '#66ccff' },
+    { name: 'Social', color: '#ff6666' },
+    { name: 'General', color: '#99ff99' },
+  ];
+
+  // Function to navigate to AddTaskScreen with category name
+  const handleCategoryPress = (categoryName) => {
+    navigation.navigate('AddTask', { categoryName });
+  };
+
   return (
     <View>
       <Text>Tasks for: {selectedDate}</Text>
-      {/* Category selection */}
-      <Picker
-        selectedValue={selectedCategory}
-        onValueChange={(itemValue) => handleCategoryChange(itemValue)}
-      >
-        <Picker.Item label="Studies" value="Studies" />
-        <Picker.Item label="Productivity" value="Productivity" />
-        <Picker.Item label="Leisure" value="Leisure" />
-        <Picker.Item label="Chores" value="Chores" />
-      </Picker>
-      {/* Form to enter tasks */}
-      <TextInput
-        style={{ borderWidth: 1, borderColor: 'gray', marginBottom: 10, padding: 5 }}
-        value={taskInput}
-        onChangeText={handleTaskInputChange}
-        placeholder="Enter task"
-      />
-      <Button title="Add Task" onPress={handleAddTask} />
-      {/* Display tasks */}
-      <View style={{ marginTop: 20 }}>
-        {tasks.map((task, index) => (
-          <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Switch
-              value={task.completed}
-              onValueChange={() => handleTaskCompleted(index)}
-            />
-            <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
-              {task.category}: {task.task}
-            </Text>
-          </View>
+      {/* Container to wrap cards horizontally */}
+      <View style={styles.horizontalContainer}>
+        {/* Display cards for each category */}
+        {categories.map((category, index) => (
+          <TouchableOpacity key={index} onPress={() => handleCategoryPress(category.name)}>
+            <View style={[styles.card, { backgroundColor: category.color }]}>
+              <Text style={{ fontSize: 18, marginBottom: 5 }}>{category.name}</Text>
+              {/* Display tasks for the category */}
+              {tasks.map((task, taskIndex) => {
+                if (task.category === category.name) {
+                  return (
+                    <View key={taskIndex} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Switch
+                        value={task.completed}
+                        onValueChange={() => handleTaskCompleted(taskIndex)}
+                      />
+                      <Text style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
+                        {task.task}
+                      </Text>
+                    </View>
+                  );
+                }
+              })}
+            </View>
+          </TouchableOpacity>
         ))}
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  horizontalContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  card: {
+    width: '45%', // Adjust the width as needed
+    height: 200, // Adjust the height as needed
+    padding: 30,
+    marginVertical: 10, // Adjust the vertical margin
+    marginHorizontal: 20, // Adjust the horizontal margin
+    borderRadius: 8,
+  },
+});
 
 export default TaskScreen;
