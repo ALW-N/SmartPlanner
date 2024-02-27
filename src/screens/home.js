@@ -65,6 +65,10 @@ const HomeScreen = ({ navigation, route }) => {
     };
   });
 
+  const navigateToTaskScreen = () => {
+    navigation.navigate('Task', { selectedDate: currentDate.toISOString().split('T')[0] });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
@@ -79,7 +83,7 @@ const HomeScreen = ({ navigation, route }) => {
           <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+      <TouchableOpacity onPress={navigateToTaskScreen}>
         <View style={styles.monthYearContainer}>
           <Text style={styles.monthYearText}>{formatMonthYear(currentDate)}</Text>
           <FontAwesomeIcon icon={faChevronRight} style={styles.arrowIcon} />

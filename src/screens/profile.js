@@ -4,8 +4,8 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 const ProfileScreen = () => {
   // Dummy user data for testing
   const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: 'Alwin Tomy',
+    email: 'alwintomy11@gmail.com',
     // avatar: require('../assets/avatar.png'), // Assuming you have an avatar image
     bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at libero arcu.',
   };

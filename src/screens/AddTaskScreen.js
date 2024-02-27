@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, TouchableOpacity, ScrollView, Platform, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, TouchableOpacity, ScrollView, Platform, Alert, Switch } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddTaskScreen = ({ route, navigation }) => {
@@ -13,6 +13,8 @@ const AddTaskScreen = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(true);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [customItem, setCustomItem] = useState('');
+  const [showCustomItem, setShowCustomItem] = useState(false); // State variable to control visibility of custom item
+  const [toggleSwitch, setToggleSwitch] = useState(false); // State variable to control switch
   const [predefinedLists, setPredefinedLists] = useState({
     'Academics/Profession': ['Homework/Assignments', 'Exams/Tests', 'Study Sessions', 'Projects'],
     'Personal': ['Fitness/Health', 'Career/Internship', 'Personal Tasks'],
@@ -24,7 +26,16 @@ const AddTaskScreen = ({ route, navigation }) => {
   const handleAddTask = () => {
     // Here you would typically add the task to your data source
     // For now, let's just navigate back to the previous screen
-    const newTask = { category: categoryName, name: taskName, description: taskDescription, time: taskTime };
+    let newTaskName = taskName; // Initialize with the current taskName
+  
+    // If the customItem is not empty, use it as the task name
+    if (customItem.trim() !== '') {
+      newTaskName = customItem.trim();
+      // Clear the customItem field
+      setCustomItem('');
+    }
+  
+    const newTask = { category: categoryName, name: newTaskName, description: taskDescription, time: taskTime };
     navigation.navigate('Home', { newTask: newTask });
   };
 
@@ -70,11 +81,13 @@ const AddTaskScreen = ({ route, navigation }) => {
   // Function to handle adding custom list item
   const handleAddCustomItem = () => {
     if (customItem.trim() !== '') {
+      const newCategory = [...predefinedLists[categoryName], customItem.trim()];
       setPredefinedLists(prevLists => ({
         ...prevLists,
-        [categoryName]: [...prevLists[categoryName], customItem]
+        [categoryName]: newCategory
       }));
       setCustomItem('');
+      setShowCustomItem(false); // Hide the custom item input
     }
   };
 
@@ -136,20 +149,29 @@ const AddTaskScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             ))}
             {/* Input field for adding custom list item */}
-            <TextInput
-              style={styles.input}
-              value={customItem}
-              onChangeText={setCustomItem}
-              placeholder="Add custom item"
-              onSubmitEditing={handleAddCustomItem}
-            />
-            {/* Option to add a new list */}
-            <TouchableOpacity
-              style={[styles.listItem, styles.addListItem]}
-              onPress={handleAddCustomItem}
-            >
-              <Text style={[styles.listItemText, styles.addListItemText]}>+ Add Custom Item</Text>
-            </TouchableOpacity>
+            {showCustomItem && (
+              <TextInput
+                style={styles.input}
+                value={customItem}
+                onChangeText={setCustomItem}
+                placeholder="Add custom item"
+                onSubmitEditing={handleAddCustomItem}
+              />
+            )}
+            {/* Toggle switch to show/hide custom item input */}
+            <View style={styles.toggleContainer}>
+              <Text>Show Custom Item</Text>
+              <Switch
+                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                thumbColor={toggleSwitch ? "#f5dd4b" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={(value) => {
+                  setToggleSwitch(value);
+                  setShowCustomItem(value); // Show or hide the custom item input based on the switch value
+                }}
+                value={toggleSwitch}
+              />
+            </View>
           </ScrollView>
           {/* Button to close the modal */}
           <Button title="Close" onPress={() => setModalVisible(false)} />
@@ -201,11 +223,11 @@ const styles = StyleSheet.create({
   listItemText: {
     fontSize: 16,
   },
-  addListItem: {
-    backgroundColor: '#e6e6e6',
-  },
-  addListItemText: {
-    color: '#666',
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: 10,
   },
   timeButton: {
     backgroundColor: '#007AFF',
