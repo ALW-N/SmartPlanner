@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Button, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Button, Platform, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AddTaskScreen = ({ route, navigation }) => {
   const { categoryName } = route.params || { categoryName: '' };
@@ -11,7 +12,7 @@ const AddTaskScreen = ({ route, navigation }) => {
     'Social': ['Extracurricular Activities', 'Meetings', 'Social Events'],
     'General': ['Reminders', 'Travel Plans', 'Sleep/Rest'],
   });
-  const [modalVisible, setModalVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(categoryName);
   const [selectedTask, setSelectedTask] = useState('');
   const [isAddingCustomTask, setIsAddingCustomTask] = useState(false);
@@ -20,6 +21,24 @@ const AddTaskScreen = ({ route, navigation }) => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pastTimeAlertVisible, setPastTimeAlertVisible] = useState(false);
+
+  // Function to handle opening modal when screen gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      setModalVisible(true);
+      setSelectedCategory(categoryName); // Set the default category when modal opens
+      return () => {
+        // Cleanup function
+        setModalVisible(false);
+      };
+    }, [categoryName])
+  );
+
+  // Function to handle displaying modal every time the component mounts or updates
+  useEffect(() => {
+    setModalVisible(true);
+  }, [route]);
 
   const handleTaskSelect = (task) => {
     setSelectedTask(task);
@@ -40,7 +59,16 @@ const AddTaskScreen = ({ route, navigation }) => {
     }
   };
 
+  // Function to handle saving task
   const handleSaveTask = () => {
+    if (!selectedCategory) {
+      Alert.alert(
+        'Please select a category',
+        'You must select a category before adding a task.',
+        [{ text: 'OK' }]
+      );
+      return; // Exit function if no category is selected
+    }
     // Save the task details and navigate back to the previous screen
     // You can implement your logic here to save the task to your data source
     navigation.goBack();
@@ -48,8 +76,19 @@ const AddTaskScreen = ({ route, navigation }) => {
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
-    setShowDatePicker(false);
-    setDate(currentDate);
+    const currentTime = currentDate.getTime();
+    const now = new Date().getTime();
+
+    // Check if the selected time is in the past
+    if (currentTime < now) {
+      // If it's in the past, show an alert or handle it accordingly
+      // For now, just reset the date to the current time
+      setDate(new Date());
+      setPastTimeAlertVisible(true);
+    } else {
+      setShowDatePicker(false);
+      setDate(currentDate);
+    }
   };
 
   return (
@@ -142,11 +181,29 @@ const AddTaskScreen = ({ route, navigation }) => {
               onChange={onChange}
             />
           )}
+          {pastTimeAlertVisible && (
+            Alert.alert(
+              'Please select a time in the future.',
+              undefined,
+              [
+                {
+                  text: 'OK',
+                  onPress: () => {
+                    setShowDatePicker(true); // Allow user to select time again
+                    setPastTimeAlertVisible(false); // Hide the alert
+                  },
+                },
+              ],
+              { cancelable: false }
+            )
+          )}
         </View>
         <View style={styles.buttonSpace}></View>
+        {/* Add Task button with disabled prop */}
         <Button
           title="Add Task"
           onPress={handleSaveTask}
+          disabled={!selectedCategory} // Disable button if no category is selected
         />
       </View>
     </View>
@@ -232,7 +289,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
-    width: '100%', // or specify a fixed width that suits your design
+    width: '100%',
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
@@ -245,7 +302,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonSpace: {
-    width: 10, // Adjust width for spacing
+    width: 10,
   },
 });
 

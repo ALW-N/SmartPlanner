@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useIsFocused } from '@react-navigation/native';
 
-const HomeScreen = ({ navigation, route }) => {
+const HomeScreen = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const isFocused = useIsFocused();
 
   const formatDate = (date) => {
     const options = { weekday: 'short' };
@@ -21,22 +22,16 @@ const HomeScreen = ({ navigation, route }) => {
   const updateCurrentDate = (newDate) => {
     setCurrentDate(newDate);
     setIsModalVisible(false);
-    fetchTasks(newDate);
+    // Update agenda dates based on the new selected month
+    // You need to implement the logic to fetch tasks for the selected month
   };
 
   useEffect(() => {
-    fetchTasks(currentDate);
-  }, []);
-
-  const fetchTasks = (date) => {
-    // Implement your logic to fetch tasks for the given date from your data source
-    // For demonstration purposes, here we are setting some dummy tasks
-    setTasks([
-      { id: 1, title: 'Task 1', date: '2024-03-01' },
-      { id: 2, title: 'Task 2', date: '2024-03-01' },
-      { id: 3, title: 'Task 3', date: '2024-03-02' },
-    ]);
-  };
+    if (isFocused) {
+      // Set current date when the screen is focused
+      setCurrentDate(new Date());
+    }
+  }, [isFocused]);
 
   const getCalendarDates = () => {
     const today = new Date(currentDate);
@@ -63,8 +58,8 @@ const HomeScreen = ({ navigation, route }) => {
     };
   });
 
-  const navigateToTaskScreen = () => {
-    navigation.navigate('Task', { selectedDate: currentDate.toISOString().split('T')[0] });
+  const toggleMonthModal = () => {
+    setIsModalVisible(!isModalVisible);
   };
 
   return (
@@ -74,14 +69,14 @@ const HomeScreen = ({ navigation, route }) => {
           <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>Alwin Tomy</Text>
-            <Text style={styles.date}>{currentDate.toDateString()}</Text> 
+            <Text style={styles.date}>{currentDate.toDateString()}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.notificationButton}>
           <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={navigateToTaskScreen}>
+      <TouchableOpacity onPress={toggleMonthModal}>
         <View style={styles.monthYearContainer}>
           <Text style={styles.monthYearText}>{formatMonthYear(currentDate)}</Text>
           <FontAwesomeIcon icon={faChevronRight} style={styles.arrowIcon} />
@@ -109,32 +104,40 @@ const HomeScreen = ({ navigation, route }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.calendarContainer}>
-        {getCalendarDates().map((date, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.calendarBox}
-            onPress={() => {
-              if (date === '+') {
-                updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-              }
-            }}>
-            {date === '+' ? (
-              <Text style={styles.nextMonthIndicator}>+</Text>
-            ) : (
-              <>
-                <Text style={styles.calendarDay}>{formatDate(date)}</Text>
-                <Text style={styles.calendarDate}>
-                  {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.calendarAndTitleContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.calendarContainer}>
+          {getCalendarDates().map((date, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.calendarBox}
+              onPress={() => {
+                if (date === '+') {
+                  updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+                } else {
+                  updateCurrentDate(date);
+                }
+              }}>
+              {date === '+' ? (
+                <Text style={styles.nextMonthIndicator}>+</Text>
+              ) : (
+                <>
+                  <Text style={styles.calendarDay}>{formatDate(date)}</Text>
+                  <Text style={styles.calendarDate}>
+                    {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {/* Title as a card */}
+        <View style={styles.card}>
+          <Text style={styles.title}>Tasks for the day</Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -155,7 +158,7 @@ const styles = {
     alignItems: 'center',
   },
   profileInfo: {
-    flexDirection: 'column', 
+    flexDirection: 'column',
     marginLeft: 10,
   },
   profilePhoto: {
@@ -186,7 +189,7 @@ const styles = {
   monthYearText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 8, 
+    marginRight: 8,
   },
   arrowIcon: {
     fontSize: 20,
@@ -194,6 +197,7 @@ const styles = {
   },
   calendarContainer: {
     alignItems: 'flex-start',
+    marginTop: 5,
   },
   calendarBox: {
     backgroundColor: '#00FF00',
@@ -225,12 +229,28 @@ const styles = {
     borderRadius: 10,
     elevation: 5,
     maxHeight: 500,
-    width: "80%", 
+    width: '80%',
   },
   monthButton: {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  calendarAndTitleContainer: {
+    marginBottom: 20, // Add margin to create space between title and bottom navigation
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 3,
+    padding: 15,
+    marginBottom: 20,
+    marginTop:20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 };
 
