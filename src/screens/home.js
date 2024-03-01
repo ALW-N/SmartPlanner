@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons'; // Import necessary icons
+import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 const HomeScreen = ({ navigation, route }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -21,24 +21,22 @@ const HomeScreen = ({ navigation, route }) => {
   const updateCurrentDate = (newDate) => {
     setCurrentDate(newDate);
     setIsModalVisible(false);
+    fetchTasks(newDate);
   };
 
   useEffect(() => {
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    const timeUntilMidnight = midnight.getTime() - Date.now();
-    const timer = setTimeout(() => {
-      updateCurrentDate(new Date());
-    }, timeUntilMidnight);
-    return () => clearTimeout(timer);
+    fetchTasks(currentDate);
   }, []);
 
-  useEffect(() => {
-    const { newTask } = route.params || {};
-    if (newTask) {
-      setTasks([...tasks, newTask]);
-    }
-  }, [route.params]);
+  const fetchTasks = (date) => {
+    // Implement your logic to fetch tasks for the given date from your data source
+    // For demonstration purposes, here we are setting some dummy tasks
+    setTasks([
+      { id: 1, title: 'Task 1', date: '2024-03-01' },
+      { id: 2, title: 'Task 2', date: '2024-03-01' },
+      { id: 3, title: 'Task 3', date: '2024-03-02' },
+    ]);
+  };
 
   const getCalendarDates = () => {
     const today = new Date(currentDate);
@@ -137,17 +135,6 @@ const HomeScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <View style={styles.tasksContainer}>
-        <Text style={styles.tasksTitle}>Tasks:</Text>
-        {tasks.map((task, index) => (
-          <View key={index} style={styles.taskCard}>
-            <Text style={styles.taskName}>{task.name}</Text>
-            <Text style={styles.taskCategory}>{task.category}</Text>
-            <Text style={styles.taskDescription}>{task.description}</Text>
-            <Text style={styles.taskTime}>{task.time.toString()}</Text>
-          </View>
-        ))}
-      </View>
     </View>
   );
 };
@@ -244,38 +231,6 @@ const styles = {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-  },
-  tasksContainer: {
-    marginTop: 20,
-  },
-  tasksTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  taskCard: {
-    backgroundColor: '#e0e0e0',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  taskName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  taskCategory: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    marginBottom: 5,
-  },
-  taskDescription: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  taskTime: {
-    fontSize: 12,
-    color: 'gray',
   },
 };
 

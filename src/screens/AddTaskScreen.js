@@ -1,183 +1,154 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, TouchableOpacity, ScrollView, Platform, Alert, Switch } from 'react-native';
+import { View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Button, Platform } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddTaskScreen = ({ route, navigation }) => {
-  const { categoryName } = route.params || { categoryName: 'Default Category' };
-
-  // State variables for task name, description, time, selected item, and modal visibility
-  const [taskName, setTaskName] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [taskTime, setTaskTime] = useState(new Date()); // Initialize with current date and time
-  const [selectedItem, setSelectedItem] = useState('');
-  const [modalVisible, setModalVisible] = useState(true);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [customItem, setCustomItem] = useState('');
-  const [showCustomItem, setShowCustomItem] = useState(false); // State variable to control visibility of custom item
-  const [toggleSwitch, setToggleSwitch] = useState(false); // State variable to control switch
-  const [predefinedLists, setPredefinedLists] = useState({
+  const { categoryName } = route.params || { categoryName: '' };
+  const [tasksByCategory, setTasksByCategory] = useState({
     'Academics/Profession': ['Homework/Assignments', 'Exams/Tests', 'Study Sessions', 'Projects'],
     'Personal': ['Fitness/Health', 'Career/Internship', 'Personal Tasks'],
     'Social': ['Extracurricular Activities', 'Meetings', 'Social Events'],
     'General': ['Reminders', 'Travel Plans', 'Sleep/Rest'],
   });
+  const [modalVisible, setModalVisible] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(categoryName);
+  const [selectedTask, setSelectedTask] = useState('');
+  const [isAddingCustomTask, setIsAddingCustomTask] = useState(false);
+  const [customTask, setCustomTask] = useState('');
+  const [taskName, setTaskName] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Function to handle adding the task
-  const handleAddTask = () => {
-    // Here you would typically add the task to your data source
-    // For now, let's just navigate back to the previous screen
-    let newTaskName = taskName; // Initialize with the current taskName
-  
-    // If the customItem is not empty, use it as the task name
-    if (customItem.trim() !== '') {
-      newTaskName = customItem.trim();
-      // Clear the customItem field
-      setCustomItem('');
-    }
-  
-    const newTask = { category: categoryName, name: newTaskName, description: taskDescription, time: taskTime };
-    navigation.navigate('Home', { newTask: newTask });
-  };
-
-  // Function to handle selecting an item from the list
-  const handleItemPress = (item) => {
-    setSelectedItem(item);
-    setTaskName(item); // Set the task name to the selected item
+  const handleTaskSelect = (task) => {
+    setSelectedTask(task);
+    setTaskName(task); // Set task name to the selected task
     setModalVisible(false);
   };
 
-  // Function to handle setting the time
-  const handleSetTime = (event, selectedTime) => {
-    if (selectedTime !== undefined) {
-      const currentTime = selectedTime || taskTime;
-      const currentTimeStamp = new Date(currentTime).getTime();
-      const nowTimeStamp = new Date().getTime();
-
-      // Check if the selected time is in the future
-      if (currentTimeStamp >= nowTimeStamp) {
-        setShowTimePicker(Platform.OS === 'ios'); // Hide the picker on iOS
-        setTaskTime(currentTime);
-      } else {
-        // If selected time is in the past, show an alert or handle it accordingly
-        // For now, we can simply ignore setting the time
-        // You can display an alert or provide feedback to the user as needed
-        Alert.alert('Invalid Time', 'Please select a time in the future.');
-      }
-    } else {
-      setShowTimePicker(false);
+  const handleAddCustomTask = () => {
+    if (customTask.trim() !== '') {
+      const updatedTasks = [...tasksByCategory[selectedCategory]];
+      updatedTasks.push(customTask.trim());
+      setTasksByCategory({
+        ...tasksByCategory,
+        [selectedCategory]: updatedTasks,
+      });
+      setCustomTask('');
+      setIsAddingCustomTask(false);
     }
   };
 
-  // Function to format the time as AM or PM
-  const formatTime = (time) => {
-    const hours = time.getHours();
-    const minutes = time.getMinutes();
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-    return `${formattedHours}:${formattedMinutes} ${period}`;
+  const handleSaveTask = () => {
+    // Save the task details and navigate back to the previous screen
+    // You can implement your logic here to save the task to your data source
+    navigation.goBack();
   };
 
-  // Function to handle adding custom list item
-  const handleAddCustomItem = () => {
-    if (customItem.trim() !== '') {
-      const newCategory = [...predefinedLists[categoryName], customItem.trim()];
-      setPredefinedLists(prevLists => ({
-        ...prevLists,
-        [categoryName]: newCategory
-      }));
-      setCustomItem('');
-      setShowCustomItem(false); // Hide the custom item input
-    }
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(false);
+    setDate(currentDate);
   };
 
   return (
     <View style={styles.container}>
-      {/* Display the selected category */}
-      <Text style={styles.categoryTitle}>Category: {categoryName}</Text>
-      {/* Input field for task name */}
-      <TextInput
-        style={styles.input}
-        value={taskName}
-        onChangeText={setTaskName}
-        placeholder="Enter task name"
-        editable={false} // Make the input non-editable
-      />
-      {/* Input field for task description */}
-      <TextInput
-        style={styles.input}
-        value={taskDescription}
-        onChangeText={setTaskDescription}
-        placeholder="Enter task description"
-        multiline
-      />
-      {/* Button to set the task time */}
-      <TouchableOpacity style={styles.timeButton} onPress={() => setShowTimePicker(true)}>
-        <Text style={styles.timeButtonText}>Set Time</Text>
-      </TouchableOpacity>
-      {/* Display selected task time */}
-      <Text style={styles.selectedTimeText}>{formatTime(taskTime)}</Text>
-      {/* Button to add the task */}
-      <Button title="Add Task" onPress={handleAddTask} />
-      
-      {/* Time picker */}
-      {showTimePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={taskTime}
-          mode="time"
-          is24Hour={true}
-          display="default"
-          onChange={handleSetTime}
-        />
-      )}
-
-      {/* Modal for displaying predefined lists */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
+        onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <ScrollView style={styles.modalContent}>
-            {predefinedLists[categoryName].map((item, index) => (
-              <TouchableOpacity key={index} style={styles.listItem} onPress={() => handleItemPress(item)}>
-                <Text style={styles.listItemText}>{item}</Text>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select a Category</Text>
+            <Picker
+              selectedValue={selectedCategory}
+              onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+            >
+              {Object.keys(tasksByCategory).map((category) => (
+                <Picker.Item key={category} label={category} value={category} />
+              ))}
+            </Picker>
+            <Text style={styles.modalTitle}>Select a Task</Text>
+            {tasksByCategory[selectedCategory] && tasksByCategory[selectedCategory].map((task, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.taskItem}
+                onPress={() => handleTaskSelect(task)}
+              >
+                <Text style={styles.taskText}>{task}</Text>
               </TouchableOpacity>
             ))}
-            {/* Input field for adding custom list item */}
-            {showCustomItem && (
-              <TextInput
-                style={styles.input}
-                value={customItem}
-                onChangeText={setCustomItem}
-                placeholder="Add custom item"
-                onSubmitEditing={handleAddCustomItem}
-              />
-            )}
-            {/* Toggle switch to show/hide custom item input */}
-            <View style={styles.toggleContainer}>
-              <Text>Show Custom Item</Text>
+            <View style={styles.switchContainer}>
+              <Text>Add Custom Task</Text>
               <Switch
-                trackColor={{ false: "#767577", true: "#81b0ff" }}
-                thumbColor={toggleSwitch ? "#f5dd4b" : "#f4f3f4"}
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={isAddingCustomTask ? '#f5dd4b' : '#f4f3f4'}
                 ios_backgroundColor="#3e3e3e"
-                onValueChange={(value) => {
-                  setToggleSwitch(value);
-                  setShowCustomItem(value); // Show or hide the custom item input based on the switch value
-                }}
-                value={toggleSwitch}
+                onValueChange={(value) => setIsAddingCustomTask(value)}
+                value={isAddingCustomTask}
               />
             </View>
-          </ScrollView>
-          {/* Button to close the modal */}
-          <Button title="Close" onPress={() => setModalVisible(false)} />
+            {isAddingCustomTask && (
+              <View style={styles.customTaskInputContainer}>
+                <TextInput
+                  style={styles.customTaskInput}
+                  value={customTask}
+                  onChangeText={setCustomTask}
+                  placeholder="Enter custom task"
+                />
+                <TouchableOpacity style={styles.addButton} onPress={handleAddCustomTask}>
+                  <Text style={styles.addButtonText}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
       
+      {/* Task details input */}
+      <View style={styles.taskDetailsContainer}>
+        <Text style={styles.categoryText}>Category: {selectedCategory}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Task Name"
+          value={taskName}
+          onChangeText={setTaskName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Select Time"
+            onPress={() => setShowDatePicker(true)}
+          />
+          <View style={styles.buttonSpace}></View>
+          {showDatePicker && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={onChange}
+            />
+          )}
+        </View>
+        <View style={styles.buttonSpace}></View>
+        <Button
+          title="Add Task"
+          onPress={handleSaveTask}
+        />
+      </View>
     </View>
   );
 };
@@ -185,22 +156,8 @@ const AddTaskScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  input: {
-    height: 40,
-    width: '100%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  categoryTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    alignItems: 'center',
   },
   modalContainer: {
     flex: 1,
@@ -212,37 +169,83 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 8,
-    maxHeight: '80%',
     width: '80%',
+    maxHeight: '80%',
   },
-  listItem: {
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  taskItem: {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
-  listItemText: {
+  taskText: {
     fontSize: 16,
   },
-  toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 10,
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
-  timeButton: {
+  customTaskInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  customTaskInput: {
+    flex: 1,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginRight: 10,
+    paddingHorizontal: 10,
+  },
+  addButton: {
     backgroundColor: '#007AFF',
     padding: 10,
     borderRadius: 5,
-    marginTop: 10,
-    alignItems: 'center',
   },
-  timeButtonText: {
+  addButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
   },
-  selectedTimeText: {
-    fontSize: 16,
-    marginTop: 10,
+  closeButton: {
+    marginTop: 20,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#007AFF',
+  },
+  taskDetailsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '80%',
+  },
+  categoryText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  input: {
+    width: '100%', // or specify a fixed width that suits your design
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  buttonSpace: {
+    width: 10, // Adjust width for spacing
   },
 });
 

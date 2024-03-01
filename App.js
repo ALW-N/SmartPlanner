@@ -6,7 +6,7 @@ import Home from './src/screens/home';
 import TaskScreen from './src/screens/task';
 import Profile from './src/screens/profile';
 import Calendar from './src/screens/calendar';
-import AddTaskScreen from './src/screens/AddTaskScreen';
+import AddTaskScreen from './src/screens/AddTaskScreen'; // Import AddTaskScreen
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHome, faTasks, faUser, faCalendarAlt, faPlus } from '@fortawesome/free-solid-svg-icons';
 
