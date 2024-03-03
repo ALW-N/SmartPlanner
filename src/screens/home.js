@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TouchableWithou
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useIsFocused } from '@react-navigation/native';
+import Svg, { Circle } from 'react-native-svg';
 
 const HomeScreen = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -65,13 +66,15 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
-        <View style={styles.profileContainer}>
-          <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
-          <View style={styles.profileInfo}>
-            <Text style={styles.userName}>Alwin Tomy</Text>
-            <Text style={styles.date}>{currentDate.toDateString()}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+          <View style={styles.profileContainer}>
+            <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
+            <View style={styles.profileInfo}>
+              <Text style={styles.userName}>Alwin Tomy</Text>
+              <Text style={styles.date}>{currentDate.toDateString()}</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.notificationButton}>
           <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
         </TouchableOpacity>
@@ -136,6 +139,14 @@ const HomeScreen = ({ navigation }) => {
         {/* Title as a card */}
         <View style={styles.card}>
           <Text style={styles.title}>Tasks for the day</Text>
+          {/* Circular Progress Bar */}
+          <View style={styles.progressBar}>
+            <Svg width="100" height="100">
+              <Circle cx="50" cy="50" r="40" stroke="#ECECEC" strokeWidth="8" fill="transparent" />
+              <Circle cx="50" cy="50" r="40" stroke="#FF5733" strokeWidth="8" fill="transparent" strokeDasharray="251.2" strokeDashoffset="125.6" />
+            </Svg>
+            <Text style={styles.progressText}>50%</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -245,12 +256,21 @@ const styles = {
     elevation: 3,
     padding: 15,
     marginBottom: 20,
-    marginTop:20,
+    marginTop: 20,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
+    marginBottom: 15,
+  },
+  progressBar: {
+    alignItems: 'center',
+  },
+  progressText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
   },
 };
 
