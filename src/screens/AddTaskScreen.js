@@ -302,6 +302,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonSpace: {
+    marginTop:30,
     width: 10,
   },
 });
