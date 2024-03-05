@@ -5,10 +5,12 @@ import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useIsFocused } from '@react-navigation/native';
 import Svg, { Circle } from 'react-native-svg';
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const isFocused = useIsFocused();
+  const [tasks, setTasks] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All'); // Initialize with 'All'
 
   const formatDate = (date) => {
     const options = { weekday: 'short' };
@@ -23,13 +25,10 @@ const HomeScreen = ({ navigation }) => {
   const updateCurrentDate = (newDate) => {
     setCurrentDate(newDate);
     setIsModalVisible(false);
-    // Update agenda dates based on the new selected month
-    // You need to implement the logic to fetch tasks for the selected month
   };
 
   useEffect(() => {
     if (isFocused) {
-      // Set current date when the screen is focused
       setCurrentDate(new Date());
     }
   }, [isFocused]);
@@ -62,6 +61,27 @@ const HomeScreen = ({ navigation }) => {
   const toggleMonthModal = () => {
     setIsModalVisible(!isModalVisible);
   };
+
+  const markTaskAsDone = (index) => {
+    // Create a copy of the tasks array
+    const updatedTasks = [...tasks];
+    // Update the 'done' property of the task at the specified index
+    updatedTasks[index].done = true;
+    // Move the task to the bottom of the array
+    const removedTask = updatedTasks.splice(index, 1)[0];
+    updatedTasks.push(removedTask);
+    // Update the state with the modified tasks array
+    setTasks(updatedTasks);
+  };
+
+  useEffect(() => {
+    if (route.params && route.params.taskData) {
+      setTasks([...tasks, { ...route.params.taskData, done: false }]);
+    }
+  }, [route.params]);
+
+  // Filter tasks based on the selected category
+  const filteredTasks = selectedCategory === 'All' ? tasks : tasks.filter(task => task.category === selectedCategory);
 
   return (
     <View style={styles.container}>
@@ -107,48 +127,73 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <View style={styles.calendarAndTitleContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.calendarContainer}>
-          {getCalendarDates().map((date, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.calendarBox}
-              onPress={() => {
-                if (date === '+') {
-                  updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-                } else {
-                  updateCurrentDate(date);
-                }
-              }}>
-              {date === '+' ? (
-                <Text style={styles.nextMonthIndicator}>+</Text>
-              ) : (
-                <>
-                  <Text style={styles.calendarDay}>{formatDate(date)}</Text>
-                  <Text style={styles.calendarDate}>
-                    {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-        {/* Title as a card */}
-        <View style={styles.card}>
-          <Text style={styles.title}>Tasks for the day</Text>
-          {/* Circular Progress Bar */}
-          <View style={styles.progressBar}>
-            <Svg width="100" height="100">
-              <Circle cx="50" cy="50" r="40" stroke="#ECECEC" strokeWidth="8" fill="transparent" />
-              <Circle cx="50" cy="50" r="40" stroke="#FF5733" strokeWidth="8" fill="transparent" strokeDasharray="251.2" strokeDashoffset="125.6" />
-            </Svg>
-            <Text style={styles.progressText}>50%</Text>
-          </View>
-        </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.calendarContainer}>
+        {getCalendarDates().map((date, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.calendarBox}
+            onPress={() => {
+              if (date === '+') {
+                updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+              } else {
+                updateCurrentDate(date);
+              }
+            }}>
+            {date === '+' ? (
+              <Text style={styles.nextMonthIndicator}>+</Text>
+            ) : (
+              <>
+                <Text style={styles.calendarDay}>{formatDate(date)}</Text>
+                <Text style={styles.calendarDate}>
+                  {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      {/* Filter buttons */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity onPress={() => setSelectedCategory('All')} style={[styles.filterButton, selectedCategory === 'All' && styles.selectedFilterButton]}>
+          <Text>All</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setSelectedCategory('Academics/Profession')} style={[styles.filterButton, selectedCategory === 'Academics/Profession' && styles.selectedFilterButton]}>
+          <Text>Academics/Prof</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setSelectedCategory('Personal')} style={[styles.filterButton, selectedCategory === 'Personal' && styles.selectedFilterButton]}>
+          <Text>Personal</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setSelectedCategory('Social')} style={[styles.filterButton, selectedCategory === 'Social' && styles.selectedFilterButton]}>
+          <Text>Social</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setSelectedCategory('General')} style={[styles.filterButton, selectedCategory === 'General' && styles.selectedFilterButton]}>
+          <Text>General</Text>
+        </TouchableOpacity>
       </View>
+      {/* Render tasks only if there are tasks */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {filteredTasks.length > 0 && (
+          <View style={styles.cardContainer}>
+            <Text style={styles.title}>Tasks for the day</Text>
+            {filteredTasks.map((task, index) => (
+              <View key={index} style={styles.card}>
+                <Text style={styles.taskCategory}>Category: {task.category}</Text>
+                <Text style={styles.taskTitle}>Title: {task.title}</Text>
+                <Text style={styles.taskDescription}>Description: {task.description}</Text>
+                <Text style={styles.taskTime}>Time: {task.time}</Text>
+                {!task.done && (
+                  <TouchableOpacity onPress={() => markTaskAsDone(index)} style={styles.markDoneButton}>
+                    <Text style={styles.markDoneButtonText}>Mark as Done</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -209,6 +254,7 @@ const styles = {
   calendarContainer: {
     alignItems: 'flex-start',
     marginTop: 5,
+  
   },
   calendarBox: {
     backgroundColor: '#00FF00',
@@ -247,8 +293,8 @@ const styles = {
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
-  calendarAndTitleContainer: {
-    marginBottom: 20, // Add margin to create space between title and bottom navigation
+  cardContainer: {
+    marginTop: 5,
   },
   card: {
     backgroundColor: 'white',
@@ -256,21 +302,51 @@ const styles = {
     elevation: 3,
     padding: 15,
     marginBottom: 20,
-    marginTop: 20,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 15,
+    marginBottom: 5,
   },
-  progressBar: {
-    alignItems: 'center',
-  },
-  progressText: {
+  taskCategory: {
     fontSize: 16,
-    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  taskTitle: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  taskDescription: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  taskTime: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  markDoneButton: {
+    backgroundColor: '#00f',
+    padding: 8,
+    borderRadius: 5,
     marginTop: 5,
+  },
+  markDoneButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 10,
+  },
+  filterButton: {
+    padding: 10,
+    backgroundColor: '#ccc',
+    borderRadius: 5,
+    marginTop:10,
+  },
+  selectedFilterButton: {
+    backgroundColor: '#00f',
   },
 };
 

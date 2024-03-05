@@ -69,9 +69,15 @@ const AddTaskScreen = ({ route, navigation }) => {
       );
       return; // Exit function if no category is selected
     }
-    // Save the task details and navigate back to the previous screen
-    // You can implement your logic here to save the task to your data source
-    navigation.goBack();
+    // Prepare task data
+    const taskData = {
+      category: selectedCategory,
+      title: taskName,
+      description: description,
+      time: date.toLocaleTimeString(), // Convert date to time string
+    };
+    // Navigate back to HomeScreen and pass task data as route params
+    navigation.navigate('Home', { taskData });
   };
 
   const onChange = (event, selectedDate) => {

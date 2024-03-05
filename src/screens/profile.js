@@ -7,7 +7,7 @@ const ProfileScreen = () => {
     name: 'Alwin Tomy',
     email: 'alwintomy11@gmail.com',
     // avatar: require('../assets/avatar.png'), // Assuming you have an avatar image
-    bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce at libero arcu.',
+    bio: 'Graph will be displayed.',
   };
 
   return (
