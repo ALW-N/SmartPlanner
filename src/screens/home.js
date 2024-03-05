@@ -156,6 +156,7 @@ const HomeScreen = ({ navigation, route }) => {
         ))}
       </ScrollView>
       {/* Filter buttons */}
+
       <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setSelectedCategory('All')} style={[styles.filterButton, selectedCategory === 'All' && styles.selectedFilterButton]}>
           <Text>All</Text>
@@ -174,6 +175,7 @@ const HomeScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       {/* Render tasks only if there are tasks */}
+
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredTasks.length > 0 && (
           <View style={styles.cardContainer}>
@@ -252,8 +254,9 @@ const styles = {
     color: 'black',
   },
   calendarContainer: {
-    alignItems: 'flex-start',
-    marginTop: 5,
+    // alignItems: 'flex-start',
+    height: 70,
+    // marginTop: 5,
   
   },
   calendarBox: {
@@ -343,7 +346,7 @@ const styles = {
     padding: 10,
     backgroundColor: '#ccc',
     borderRadius: 5,
-    marginTop:10,
+    // marginTop:10,
   },
   selectedFilterButton: {
     backgroundColor: '#00f',
