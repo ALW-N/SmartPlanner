@@ -1,16 +1,11 @@
-// src/screens/calendar.js
 import React from 'react';
-import { Calendar } from 'react-native-calendars';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 
 export default function CalendarScreen({ navigation }) {
   return (
-    <View>
-      <Calendar
-        onDayPress={(day) => {
-          navigation.navigate('Task', { selectedDate: day.dateString });
-        }}
-      />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Calendar Screen</Text>
+      {/* Add your calendar UI here */}
     </View>
   );
 }

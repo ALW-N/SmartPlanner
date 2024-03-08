@@ -1,282 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView } from 'react-native'; // Add ScrollView here
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import React from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
 
-
-const HomeScreen = ({ navigation, route }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [isModalVisible, setIsModalVisible] = useState(false);
+const HomeScreen = ({ navigation }) => {
+  // If you still need to use useIsFocused, you can keep it
   const isFocused = useIsFocused();
-  const [tasks, setTasks] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All'); // Initialize with 'All'
 
-  const formatDate = (date) => {
-    const options = { weekday: 'short' };
-    return date.toLocaleDateString('en-US', options);
-  };
+  // Get the current date
+  const currentDate = new Date();
+  // Get the day, month, and date
+  const day = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+  const month = currentDate.toLocaleDateString('en-US', { month: 'long' });
+  const date = currentDate.getDate();
 
-  const formatMonthYear = (date) => {
-    const options = { month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-  };
-
-  const updateCurrentDate = (newDate) => {
-    setCurrentDate(newDate);
-    setIsModalVisible(false);
-  };
-
-  useEffect(() => {
-    if (isFocused) {
-      setCurrentDate(new Date());
-    }
-  }, [isFocused]);
-
-  const monthNames = Array.from({ length: 12 }, (_, index) => {
-    return {
-      label: formatMonthYear(new Date(currentDate.getFullYear(), index, 1)),
-      value: index,
-    };
-  });
-
-  const toggleMonthModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
-  const markTaskAsDone = (index) => {
-    // Create a copy of the tasks array
-    const updatedTasks = [...tasks];
-    // Update the 'done' property of the task at the specified index
-    updatedTasks[index].done = true;
-    // Move the task to the bottom of the array
-    const removedTask = updatedTasks.splice(index, 1)[0];
-    updatedTasks.push(removedTask);
-    // Update the state with the modified tasks array
-    setTasks(updatedTasks);
-  };
-
-  useEffect(() => {
-    if (route.params && route.params.taskData) {
-      setTasks([...tasks, { ...route.params.taskData, done: false }]);
-    }
-  }, [route.params]);
-
-  // Filter tasks based on the selected category
-  const filteredTasks = selectedCategory === 'All' ? tasks : tasks.filter(task => task.category === selectedCategory);
+  // Add any navigation-related logic here
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <View style={styles.profileContainer}>
-            <Image source={require('../assets/profile.png')} style={styles.profilePhoto} />
-            <View style={styles.profileInfo}>
-              <Text style={styles.userName}>Alwin Tomy</Text>
-              <Text style={styles.date}>{currentDate.toDateString()}</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.notificationButton}>
-          <FontAwesomeIcon icon={faBell} style={styles.notificationIcon} />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity onPress={toggleMonthModal}>
-        <View style={styles.monthYearContainer}>
-          <Text style={styles.monthYearText}>{formatMonthYear(currentDate)}</Text>
-          <FontAwesomeIcon icon={faChevronRight} style={styles.arrowIcon} />
+    <View style={{ flex: 1, backgroundColor: 'black', borderTopWidth: 0, paddingHorizontal: 40, paddingTop: 80 }}>
+      {/* Display the current day, month, and date */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View>
+          <Text style={{ color: 'white', fontSize: 18, marginBottom: 10 }}>{`${day}, ${month} ${date}`}</Text>
+          <Text style={{ color: 'white', fontSize: 24 }}>Hey Alwin 🙋‍♂️</Text>
         </View>
-      </TouchableOpacity>
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsModalVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              {monthNames.map((month, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => updateCurrentDate(new Date(currentDate.getFullYear(), month.value, 1))}
-                  style={styles.monthButton}>
-                  <Text>{month.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-      {/* Filter buttons */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity onPress={() => setSelectedCategory('All')} style={[styles.filterButton, selectedCategory === 'All' && styles.selectedFilterButton]}>
-          <Text>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedCategory('Academics/Profession')} style={[styles.filterButton, selectedCategory === 'Academics/Profession' && styles.selectedFilterButton]}>
-          <Text>Academics/Prof</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedCategory('Personal')} style={[styles.filterButton, selectedCategory === 'Personal' && styles.selectedFilterButton]}>
-          <Text>Personal</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedCategory('Social')} style={[styles.filterButton, selectedCategory === 'Social' && styles.selectedFilterButton]}>
-          <Text>Social</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedCategory('General')} style={[styles.filterButton, selectedCategory === 'General' && styles.selectedFilterButton]}>
-          <Text>General</Text>
+        {/* Notification Bell Icon */}
+        <TouchableOpacity onPress={() => console.log("Notification bell icon pressed")} style={{ paddingHorizontal: 10,paddingTop:30 }}>
+          <FontAwesomeIcon icon={faBell} size={20} color="white" />
         </TouchableOpacity>
       </View>
-      {/* Render tasks only if there are tasks */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {filteredTasks.length > 0 && (
-          <View style={styles.cardContainer}>
-            <Text style={styles.title}>Tasks for the day</Text>
-            {filteredTasks.map((task, index) => (
-              <View key={index} style={styles.card}>
-                <Text style={styles.taskCategory}>Category: {task.category}</Text>
-                <Text style={styles.taskTitle}>Title: {task.title}</Text>
-                <Text style={styles.taskDescription}>Description: {task.description}</Text>
-                <Text style={styles.taskTime}>Time: {task.time}</Text>
-                {!task.done && (
-                  <TouchableOpacity onPress={() => markTaskAsDone(index)} style={styles.markDoneButton}>
-                    <Text style={styles.markDoneButtonText}>Mark as Done</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
+      {/* Cards Section */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ marginTop: 30 }}>
+        <TouchableOpacity style={{ backgroundColor: '#DDFF94', width: 130, height: 140, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: 5 }}>
+          <Text style={{ color: 'black', fontSize: 18 }}>My Tasks</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ backgroundColor: '#9F7AF9', width: 130, height: 140, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: 5 }}>
+          <Text style={{ color: 'white', fontSize: 18 }}>Card 2</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ backgroundColor: '#FB83F7', width: 130, height: 140, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginHorizontal: 5 }}>
+          <Text style={{ color: 'white', fontSize: 18 }}>Card 3</Text>
+        </TouchableOpacity>
       </ScrollView>
+      {/* Recent Tasks Heading */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 'auto', marginBottom: 500 }}>
+        <Text style={{ color: 'white', fontSize: 20, marginRight: 10 }}>Recent Tasks</Text>
+      </View>
     </View>
   );
-};
-
-const styles = {
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileInfo: {
-    flexDirection: 'column',
-    marginLeft: 10,
-  },
-  profilePhoto: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  date: {
-    fontSize: 12,
-    color: 'gray',
-  },
-  notificationButton: {
-    padding: 10,
-  },
-  notificationIcon: {
-    width: 20,
-    height: 20,
-  },
-  monthYearContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  monthYearText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  arrowIcon: {
-    fontSize: 20,
-    color: 'black',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 5,
-    maxHeight: 500,
-    width: '80%',
-  },
-  monthButton: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  cardContainer: {
-    marginTop: 5,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    elevation: 3,
-    padding: 15,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  taskCategory: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  taskTitle: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  taskDescription: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  taskTime: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  markDoneButton: {
-    backgroundColor: '#00f',
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 5,
-  },
-  markDoneButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  filterButton: {
-    padding: 10,
-    backgroundColor: '#ccc',
-    borderRadius: 5,
-    // marginTop:10,
-  },
-  selectedFilterButton: {
-    backgroundColor: '#00f',
-  },
 };
 
 export default HomeScreen;

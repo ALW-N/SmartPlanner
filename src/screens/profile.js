@@ -6,7 +6,7 @@ const ProfileScreen = () => {
   const user = {
     name: 'Alwin Tomy',
     email: 'alwintomy11@gmail.com',
-    // avatar: require('../assets/avatar.png'), // Assuming you have an avatar image
+    avatar: require('../assets/profile.png'), // Assuming you have an avatar image
     bio: 'Graph will be displayed.',
   };
 
