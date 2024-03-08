@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView } from 'react-native'; // Add ScrollView here
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBell, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useIsFocused } from '@react-navigation/native';
-import Svg, { Circle } from 'react-native-svg';
+
 
 const HomeScreen = ({ navigation, route }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -32,24 +32,6 @@ const HomeScreen = ({ navigation, route }) => {
       setCurrentDate(new Date());
     }
   }, [isFocused]);
-
-  const getCalendarDates = () => {
-    const today = new Date(currentDate);
-    const currentMonth = today.getMonth();
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(currentMonth + 1);
-
-    const calendarDates = [];
-    let date = new Date(today);
-    while (date.getMonth() === currentMonth) {
-      calendarDates.push(new Date(date));
-      date.setDate(date.getDate() + 1);
-    }
-
-    calendarDates.push('+');
-
-    return calendarDates;
-  };
 
   const monthNames = Array.from({ length: 12 }, (_, index) => {
     return {
@@ -113,50 +95,19 @@ const HomeScreen = ({ navigation, route }) => {
         <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <ScrollView>
-                {monthNames.map((month, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => updateCurrentDate(new Date(currentDate.getFullYear(), month.value, 1))}
-                    style={styles.monthButton}>
-                    <Text>{month.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+              {monthNames.map((month, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => updateCurrentDate(new Date(currentDate.getFullYear(), month.value, 1))}
+                  style={styles.monthButton}>
+                  <Text>{month.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.calendarContainer}>
-        {getCalendarDates().map((date, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.calendarBox}
-            onPress={() => {
-              if (date === '+') {
-                updateCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-              } else {
-                updateCurrentDate(date);
-              }
-            }}>
-            {date === '+' ? (
-              <Text style={styles.nextMonthIndicator}>+</Text>
-            ) : (
-              <>
-                <Text style={styles.calendarDay}>{formatDate(date)}</Text>
-                <Text style={styles.calendarDate}>
-                  {date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
       {/* Filter buttons */}
-
       <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setSelectedCategory('All')} style={[styles.filterButton, selectedCategory === 'All' && styles.selectedFilterButton]}>
           <Text>All</Text>
@@ -175,7 +126,6 @@ const HomeScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       {/* Render tasks only if there are tasks */}
-
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredTasks.length > 0 && (
           <View style={styles.cardContainer}>
@@ -252,30 +202,6 @@ const styles = {
   arrowIcon: {
     fontSize: 20,
     color: 'black',
-  },
-  calendarContainer: {
-    // alignItems: 'flex-start',
-    height: 70,
-    // marginTop: 5,
-  
-  },
-  calendarBox: {
-    backgroundColor: '#00FF00',
-    padding: 15,
-    marginRight: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  calendarDay: {
-    fontSize: 12,
-  },
-  calendarDate: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  nextMonthIndicator: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
