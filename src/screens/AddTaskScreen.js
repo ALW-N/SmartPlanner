@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddTaskScreen = ({ navigation, route }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTask, setSelectedTask] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [customTaskName, setCustomTaskName] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Default to current date
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
 
   useEffect(() => {
     if (route.params && route.params.selectedCategory) {
@@ -46,15 +53,212 @@ const AddTaskScreen = ({ navigation, route }) => {
     setSelectedTask(selectedTask === '' ? tasks[0] : ''); // Toggle picker dropdown
   };
 
+  const handleCustomTaskInput = () => {
+    if (customTaskName.trim() !== '') {
+      setTasks([...tasks.filter(task => task !== 'Custom'), customTaskName, 'Custom']);
+      setSelectedTask(customTaskName);
+    } else {
+      Alert.alert('Error', 'Please enter a valid task name');
+    }
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || selectedDate;
+    setShowDatePicker(false);
+    setSelectedDate(currentDate);
+  };
+
+  const handleTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || selectedTime;
+    setShowTimePicker(false);
+    setSelectedTime(currentTime);
+  };
+
+  const formatDate = (date) => {
+    const day = date.getDate();
+    const month = date.toLocaleString('default', { month: 'long' });
+    return `${day} ${month}`;
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: 'black',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingTop: 70,
+      paddingHorizontal: 20,
+    },
+    heading: {
+      fontSize: 25,
+      color: 'white',
+      marginLeft: 80,
+    },
+    cancel: {
+      fontSize: 18,
+      color: '#A9A9A9',
+      marginRight: 10,
+    },
+    subHeading: {
+      fontSize: 20,
+      color: 'white',
+      marginTop: 50,
+      marginBottom: 10,
+      marginLeft: 20,
+    },
+    filterContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginLeft: 20,
+      marginRight: 20,
+    },
+    filter: {
+      backgroundColor: '#333333',
+      borderRadius: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      marginRight: 10,
+      marginBottom: 10,
+    },
+    selectedFilter: {
+      backgroundColor: '#DDFF94',
+    },
+    selectedFilterText: {
+      color: 'black',
+    },
+    filterText: {
+      color: 'white',
+    },
+    pickerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 20,
+      marginRight: 20,
+      marginBottom: 20,
+    },
+    picker: {
+      flex: 1,
+      color: 'white',
+    },
+    dropdownIcon: {
+      marginLeft: 10,
+    },
+    customInputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: 20,
+      marginRight: 20,
+      marginBottom:10,
+    },
+    customInput: {
+      flex: 1,
+      backgroundColor: '#333333',
+      borderRadius: 20,
+      color: 'white',
+      paddingHorizontal: 20,
+      marginRight: 10,
+    },
+    addButton: {
+      backgroundColor: '#DDFF94',
+      borderRadius: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+    },
+    addButtonText: {
+      color: 'black',
+    },
+    descriptionContainer: {
+      paddingHorizontal: 20,
+      marginTop:10,
+    },
+    descriptionInput: {
+      backgroundColor: '#333333',
+      borderRadius: 20,
+      color: 'white',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      marginTop: 10,
+    },
+    timePickerCard: {
+      backgroundColor: '#333333',
+      borderRadius: 10,
+      padding: 10,
+      flexDirection: 'row', 
+      marginRight: 10, // Adjust margin if needed
+      marginLeft: 20,
+      marginTop:10,
+      marginBottom: 20, // Adjust marginBottom to change the size of the card
+      width: '45%', // Adjust width to change the size of the card
+    },
+    datePickerCard: {
+      backgroundColor: '#333333',
+      borderRadius: 10,
+      padding: 10,
+      flexDirection: 'row', 
+      marginRight: 20, // Adjust margin if needed
+      marginBottom: 20, // Adjust marginBottom to change the size of the card
+      marginTop:10,
+      width: '45%', // Adjust width to change the size of the card
+    },
+    pickerInner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end', 
+    },
+    pickerText: {
+      color: 'white',
+      marginRight: 50,
+    },
+    calendarIcon: {
+      marginLeft: 10,
+    },
+    taskHeading: {
+      fontSize: 20,
+      color: 'white',
+      marginTop: 10,
+      marginBottom: 10,
+      marginLeft: 20,
+    },
+    descriptionHeading: {
+      fontSize: 20,
+      color: 'white',
+      marginTop: 10,
+      marginBottom: 10,
+      marginLeft: 20,
+    },
+    // New style for the "Due Date" and "Estimate Task" headings
+    subHeadingContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginLeft: 20,
+      marginRight: 20,
+      marginTop: 20,
+    },
+    dueDateHeading: {
+      fontSize: 20,
+      color: 'white',
+    },
+    estimateTaskHeading: {
+      fontSize: 20,
+      color: 'white',
+      marginLeft: 90,
+      marginRight: 65,
+    },
+  });
+
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel}>
           <Text style={styles.cancel}>Cancel</Text>
         </TouchableOpacity>
         <Text style={styles.heading}>Add Task</Text>
       </View>
-      
+
+      {/* Category selection */}
       <Text style={styles.subHeading}>Category</Text>
       <View style={styles.filterContainer}>
         {['Academics/Profession', 'Personal', 'Social', 'General'].map((category, index) => (
@@ -72,7 +276,8 @@ const AddTaskScreen = ({ navigation, route }) => {
         ))}
       </View>
 
-      <Text style={styles.subHeading}>Task</Text>
+      {/* Task selection */}
+      <Text style={styles.taskHeading}>Task</Text>
       <TouchableOpacity style={styles.pickerContainer} onPress={togglePicker}>
         <Picker
           selectedValue={selectedTask}
@@ -86,75 +291,71 @@ const AddTaskScreen = ({ navigation, route }) => {
         </Picker>
         <Icon name="angle-down" size={20} color="white" style={styles.dropdownIcon} />
       </TouchableOpacity>
+
+      {/* Custom task input */}
+      {selectedTask === 'Custom' && (
+        <View style={styles.customInputContainer}>
+          <TextInput
+            style={styles.customInput}
+            placeholder="Enter custom task name"
+            value={customTaskName}
+            onChangeText={(text) => setCustomTaskName(text)}
+          />
+          <TouchableOpacity style={styles.addButton} onPress={handleCustomTaskInput}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Description input */}
+      <Text style={styles.descriptionHeading}>Description</Text>
+      <View style={styles.descriptionContainer}>
+        <TextInput
+          style={styles.descriptionInput}
+          placeholder="Enter task description"
+          multiline={true}
+          numberOfLines={4}
+          onChangeText={(text) => setDescription(text)}
+          value={description}
+        />
+      </View>
+
+      {/* Subheading for Due Date and Estimate Task */}
+      <View style={styles.subHeadingContainer}>
+        <Text style={styles.dueDateHeading}>Due Date</Text>
+        <Text style={styles.estimateTaskHeading}>Estimate Task</Text>
+      </View>
+
+      {/* Due Date and Time Pickers */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
+        {/* Date Picker */}
+        <TouchableOpacity style={[styles.datePickerCard, { marginRight: 10 }]} onPress={() => setShowDatePicker(true)}>
+          <View style={styles.pickerInner}>
+            <Text style={styles.pickerText}>{formatDate(selectedDate)}</Text>
+            <Icon name="calendar" size={20} color="white" style={styles.calendarIcon} />
+          </View>
+        </TouchableOpacity>
+
+        {/* Time Picker */}
+        <TouchableOpacity style={styles.timePickerCard} onPress={() => setShowTimePicker(true)}>
+          <View style={styles.pickerInner}>
+            <Text style={styles.pickerText}>Select Time</Text>
+            <Icon name="clock-o" size={20} color="white" style={styles.calendarIcon} />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {showTimePicker && (
+        <DateTimePicker
+          value={selectedTime}
+          mode="time"
+          display="spinner"
+          onChange={handleTimeChange}
+        />
+      )}
+
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 70,
-    paddingHorizontal: 20,
-  },
-  heading: {
-    fontSize: 25,
-    color: 'white',
-    marginLeft: 80,
-  },
-  cancel: {
-    fontSize: 18,
-    color: '#A9A9A9',
-    marginRight: 10,
-  },
-  subHeading: {
-    fontSize: 20,
-    color: 'white',
-    marginTop: 50,
-    marginBottom: 10,
-    marginLeft: 20,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginLeft: 20,
-    marginRight: 20,
-  },
-  filter: {
-    backgroundColor: '#333333',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  selectedFilter: {
-    backgroundColor: '#DDFF94',
-  },
-  selectedFilterText: {
-    color: 'black',
-  },
-  filterText: {
-    color: 'white',
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 20,
-    marginRight: 20,
-    marginBottom: 20,
-  },
-  picker: {
-    flex: 1,
-    color: 'white',
-  },
-  dropdownIcon: {
-    marginLeft: 10,
-  },
-});
 
 export default AddTaskScreen;

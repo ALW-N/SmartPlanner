@@ -29,7 +29,7 @@ const TaskScreen = ({ navigation }) => {
   );
 
   return (
-    <Stack.Navigator headerMode="none">
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="TaskList">
         {() => (
           <View style={styles.container}>
