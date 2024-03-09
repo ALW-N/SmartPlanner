@@ -1,7 +1,11 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import AddTaskScreen from './AddTaskScreen';
 
-const TaskScreen = ({ route, navigation }) => {
+const Stack = createStackNavigator();
+
+const TaskScreen = ({ navigation }) => {
   // Define categories
   const categories = [
     { name: 'Academics/Profession', color: '#222222', image: require('../assets/Academics.png') },
@@ -10,27 +14,39 @@ const TaskScreen = ({ route, navigation }) => {
     { name: 'General', color: '#222222', image: require('../assets/General.png') }, 
   ];
 
+  // Function to navigate to AddTaskScreen when a category card is pressed
+  const handleCategoryPress = (selectedCategory) => {
+    navigation.navigate('AddTaskScreen', { selectedCategory });
+  };
+
   // Function to render each category item
   const renderCategoryItem = ({ item }) => (
-    <View style={[styles.card, { backgroundColor: item.color }]}>
+    <TouchableOpacity style={[styles.card, { backgroundColor: item.color }]} onPress={() => handleCategoryPress(item.name)}>
       {/* Display image */}
       {item.image && <Image source={item.image} style={styles.image} />}
       <Text style={styles.categoryText}>{item.name}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Categories</Text>
-      {/* FlatList to display categories */}
-      <FlatList
-        data={categories}
-        renderItem={renderCategoryItem}
-        keyExtractor={(item) => item.name}
-        numColumns={2}
-        contentContainerStyle={styles.flatListContent}
-      />
-    </View>
+    <Stack.Navigator headerMode="none">
+      <Stack.Screen name="TaskList">
+        {() => (
+          <View style={styles.container}>
+            <Text style={styles.heading}>Categories</Text>
+            {/* FlatList to display categories */}
+            <FlatList
+              data={categories}
+              renderItem={renderCategoryItem}
+              keyExtractor={(item) => item.name}
+              numColumns={2}
+              contentContainerStyle={styles.flatListContent}
+            />
+          </View>
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="AddTaskScreen" component={AddTaskScreen} />
+    </Stack.Navigator>
   );
 };
 
