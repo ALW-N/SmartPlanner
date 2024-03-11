@@ -12,8 +12,11 @@ const AddTaskScreen = ({ navigation, route }) => {
   const [description, setDescription] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date()); // Default to current date
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [selectedStartTime, setSelectedStartTime] = useState(null); // Initialize with null
+  const [selectedEndTime, setSelectedEndTime] = useState(null); // Initialize with null
+  const [timeDuration, setTimeDuration] = useState('00:00');
 
   useEffect(() => {
     if (route.params && route.params.selectedCategory) {
@@ -65,19 +68,70 @@ const AddTaskScreen = ({ navigation, route }) => {
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || selectedDate;
     setShowDatePicker(false);
-    setSelectedDate(currentDate);
+
+    // Get the current date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set hours to 00:00:00
+
+    // Check if selected date is in the past
+    if (currentDate < today) {
+      Alert.alert('Error', 'Please select a date in the future');
+    } else {
+      setSelectedDate(currentDate);
+    }
   };
 
-  const handleTimeChange = (event, selectedTime) => {
+  const handleStartTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || selectedTime;
-    setShowTimePicker(false);
-    setSelectedTime(currentTime);
+    setShowStartTimePicker(false);
+    const currentDateTime = new Date();
+
+    // Check if selected start time is before the current time
+    if (currentTime < currentDateTime) {
+      Alert.alert('Error', 'Start time cannot be in the past. Please select a time from the current time onwards.');
+    } else {
+      setSelectedStartTime(currentTime);
+      updateTimeDuration(currentTime, selectedEndTime || new Date()); // Provide default value if selectedEndTime is null
+    }
+  };
+
+  const handleEndTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || selectedTime;
+    setShowEndTimePicker(false);
+    setSelectedEndTime(currentTime);
+    updateTimeDuration(selectedStartTime || new Date(), currentTime); // Provide default value if selectedStartTime is null
+  };
+
+  const updateTimeDuration = (startTime, endTime) => {
+    if (startTime && endTime) {
+      const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60); // Convert milliseconds to minutes
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+      setTimeDuration(`${hours}:${minutes < 10 ? '0' : ''}${minutes}`);
+    } else {
+      setTimeDuration('00:00');
+    }
   };
 
   const formatDate = (date) => {
     const day = date.getDate();
     const month = date.toLocaleString('default', { month: 'long' });
     return `${day} ${month}`;
+  };
+
+  const formatTime = (time, defaultText) => {
+    if (!time) {
+      return defaultText;
+    } else {
+      const hours = time.getHours();
+      const minutes = time.getMinutes();
+      return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+    }
+  };
+
+  const handleCreateTask = () => {
+    // Implement the logic to create the task here
+    // This function will be called when the "Create Task" button is pressed
   };
 
   const styles = StyleSheet.create({
@@ -105,7 +159,7 @@ const AddTaskScreen = ({ navigation, route }) => {
       fontSize: 20,
       color: 'white',
       marginTop: 50,
-      marginBottom: 10,
+      marginBottom: 20,
       marginLeft: 20,
     },
     filterContainer: {
@@ -120,7 +174,7 @@ const AddTaskScreen = ({ navigation, route }) => {
       paddingVertical: 10,
       paddingHorizontal: 20,
       marginRight: 10,
-      marginBottom: 10,
+      marginBottom: 20,
     },
     selectedFilter: {
       backgroundColor: '#DDFF94',
@@ -186,21 +240,10 @@ const AddTaskScreen = ({ navigation, route }) => {
       borderRadius: 10,
       padding: 10,
       flexDirection: 'row', 
-      marginRight: 10, // Adjust margin if needed
-      marginLeft: 20,
-      marginTop:10,
-      marginBottom: 20, // Adjust marginBottom to change the size of the card
-      width: '45%', // Adjust width to change the size of the card
-    },
-    datePickerCard: {
-      backgroundColor: '#333333',
-      borderRadius: 10,
-      padding: 10,
-      flexDirection: 'row', 
       marginRight: 20, // Adjust margin if needed
       marginBottom: 20, // Adjust marginBottom to change the size of the card
       marginTop:10,
-      width: '45%', // Adjust width to change the size of the card
+      width: '30%', // Adjust width to change the size of the card
     },
     pickerInner: {
       flexDirection: 'row',
@@ -209,7 +252,7 @@ const AddTaskScreen = ({ navigation, route }) => {
     },
     pickerText: {
       color: 'white',
-      marginRight: 50,
+      marginLeft: 30,
     },
     calendarIcon: {
       marginLeft: 10,
@@ -245,6 +288,21 @@ const AddTaskScreen = ({ navigation, route }) => {
       color: 'white',
       marginLeft: 90,
       marginRight: 65,
+    },
+    // New style for the "Create Task" button
+    createTaskButton: {
+      backgroundColor: '#DDFF94',
+      borderRadius: 10,
+      paddingVertical: 15,
+      alignItems: 'center',
+      marginHorizontal: 20,
+      marginTop:30,
+      borderRadius:30,
+      // marginBottom: 20,
+    },
+    createTaskButtonText: {
+      color: '#1E1E1E',
+      fontSize: 18,
     },
   });
 
@@ -326,31 +384,68 @@ const AddTaskScreen = ({ navigation, route }) => {
         <Text style={styles.estimateTaskHeading}>Estimate Task</Text>
       </View>
 
-      {/* Due Date and Time Pickers */}
+      {/* Date and Time Pickers */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-        {/* Date Picker */}
-        <TouchableOpacity style={[styles.datePickerCard, { marginRight: 10 }]} onPress={() => setShowDatePicker(true)}>
+        {/* Start Date Picker */}
+        <TouchableOpacity style={[styles.timePickerCard, { marginRight: 10 }]} onPress={() => setShowDatePicker(true)}>
           <View style={styles.pickerInner}>
-            <Text style={styles.pickerText}>{formatDate(selectedDate)}</Text>
+            <Text style={styles.pickerText}> {formatDate(selectedDate)}</Text>
             <Icon name="calendar" size={20} color="white" style={styles.calendarIcon} />
           </View>
         </TouchableOpacity>
 
-        {/* Time Picker */}
-        <TouchableOpacity style={styles.timePickerCard} onPress={() => setShowTimePicker(true)}>
+        {/* Start Time Picker */}
+        <TouchableOpacity style={[styles.timePickerCard, { marginRight: 10 }]} onPress={() => setShowStartTimePicker(true)}>
           <View style={styles.pickerInner}>
-            <Text style={styles.pickerText}>Select Time</Text>
+            <Text style={styles.pickerText}>
+               {selectedStartTime ? formatTime(selectedStartTime, 'Start Time') : 'Start Time'}
+            </Text>
+            <Icon name="clock-o" size={20} color="white" style={styles.calendarIcon} />
+          </View>
+        </TouchableOpacity>
+
+        {/* End Time Picker */}
+        <TouchableOpacity style={styles.timePickerCard} onPress={() => setShowEndTimePicker(true)}>
+          <View style={styles.pickerInner}>
+            <Text style={styles.pickerText}>
+               {selectedEndTime ? formatTime(selectedEndTime, 'End Time') : 'End Time'}
+            </Text>
             <Icon name="clock-o" size={20} color="white" style={styles.calendarIcon} />
           </View>
         </TouchableOpacity>
       </View>
 
-      {showTimePicker && (
+      {/* "Create Task" button */}
+      <TouchableOpacity style={styles.createTaskButton} onPress={handleCreateTask}>
+        <Text style={styles.createTaskButtonText}>Create Task</Text>
+      </TouchableOpacity>
+
+      {/* DateTimePicker modals */}
+      {showDatePicker && (
         <DateTimePicker
-          value={selectedTime}
+          value={selectedDate}
+          mode="date"
+          display="spinner"
+          onChange={handleDateChange}
+          minimumDate={new Date()} 
+        />
+      )}
+
+      {showStartTimePicker && (
+        <DateTimePicker
+          value={selectedStartTime || new Date()} // Provide a default value if selectedStartTime is null
           mode="time"
           display="spinner"
-          onChange={handleTimeChange}
+          onChange={handleStartTimeChange}
+        />
+      )}
+
+      {showEndTimePicker && (
+        <DateTimePicker
+          value={selectedEndTime || new Date()} // Provide a default value if selectedEndTime is null
+          mode="time"
+          display="spinner"
+          onChange={handleEndTimeChange}
         />
       )}
 
