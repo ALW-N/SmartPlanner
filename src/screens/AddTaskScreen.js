@@ -23,6 +23,24 @@ const AddTaskScreen = ({ navigation, route }) => {
   const [showStartTimePicker, setShowStartTimePicker] = useState(false); // State to control start time picker visibility
   const [showEndTimePicker, setShowEndTimePicker] = useState(false); // State to control end time picker visibility
 
+  // Function to handle creating the task
+const handleCreateTask = () => {
+  // Implement your logic here to create the task
+  // This function will be called when the "Create Task" button is pressed
+  // You can use the data stored in state variables like selectedCategory, selectedTask, description, startDate, endDate, startTime, endTime, etc.
+  // For now, let's just log the task details to the console
+  console.log('Task details:', {
+    selectedCategory,
+    selectedTask,
+    description,
+    startDate,
+    endDate,
+    startTime,
+    endTime,
+  });
+};
+
+
   // Effect hook to update selected category
   useEffect(() => {
     if (route.params && route.params.selectedCategory) {
@@ -81,7 +99,7 @@ const AddTaskScreen = ({ navigation, route }) => {
     const currentDate = selectedDate || startDate;
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set hours to midnight for comparison
-    
+
     if (currentDate < today) {
       // Date is in the past
       setShowStartDatePicker(false); // Hide the date picker
@@ -101,7 +119,7 @@ const AddTaskScreen = ({ navigation, route }) => {
     const currentDate = selectedDate || endDate;
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set hours to midnight for comparison
-    
+
     if (currentDate < today) {
       // Date is in the past
       setShowEndDatePicker(false); // Hide the date picker
@@ -127,7 +145,7 @@ const AddTaskScreen = ({ navigation, route }) => {
     const currentTime = selectedTime || startTime;
     const currentDate = new Date(); // Current date
     const selectedDate = startDate; // Selected start date
-    
+
     // Check if the selected date is today
     if (
       currentDate.getDate() === selectedDate.getDate() &&
@@ -149,31 +167,31 @@ const AddTaskScreen = ({ navigation, route }) => {
     }
   };
 
-// Function to handle end time change
-const handleEndTimeChange = (event, selectedTime) => {
-  const currentTime = selectedTime || endTime;
-  const currentDate = new Date(); // Current date
+  // Function to handle end time change
+  const handleEndTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || endTime;
+    const currentDate = new Date(); // Current date
 
-  if (startDate.getDate() === endDate.getDate() &&
+    if (startDate.getDate() === endDate.getDate() &&
       startDate.getMonth() === endDate.getMonth() &&
       startDate.getFullYear() === endDate.getFullYear()) {
-    // Start date and end date are the same
-    // Check if the selected time is in the past or equal to the start time
-    if (currentTime <= startTime) {
-      // If the selected time is in the past or equal to the start time, set it to the start time
-      setShowEndTimePicker(false);
-      setEndTime(new Date(startTime)); // Set end time to the same as start time
+      // Start date and end date are the same
+      // Check if the selected time is in the past or equal to the start time
+      if (currentTime <= startTime) {
+        // If the selected time is in the past or equal to the start time, set it to the start time
+        setShowEndTimePicker(false);
+        setEndTime(new Date(startTime)); // Set end time to the same as start time
+      } else {
+        setShowEndTimePicker(false);
+        setEndTime(currentTime);
+      }
     } else {
+      // Start date and end date are different
+      // Allow setting the end time to any time
       setShowEndTimePicker(false);
       setEndTime(currentTime);
     }
-  } else {
-    // Start date and end date are different
-    // Allow setting the end time to any time
-    setShowEndTimePicker(false);
-    setEndTime(currentTime);
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -308,6 +326,10 @@ const handleEndTimeChange = (event, selectedTime) => {
           onChange={handleEndTimeChange}
         />
       )}
+      {/* Button to create task */}
+      <TouchableOpacity style={styles.createTaskButton} onPress={handleCreateTask}>
+        <Text style={styles.createTaskButtonText}>Create Task</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -318,6 +340,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black',
   },
+  createTaskButton: {
+    backgroundColor: '#DDFF94',
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    marginTop: 20,
+  },
+  createTaskButtonText: {
+    color: 'black',
+    fontSize: 18,
+  },
+  
   header: {
     flexDirection: 'row',
     alignItems: 'center',
