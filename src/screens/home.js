@@ -1,12 +1,12 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
+// HomeScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBell, faSort } from '@fortawesome/free-solid-svg-icons'; // Assuming you have the filter icon
+import { faBell, faSort } from '@fortawesome/free-solid-svg-icons';
 
-const HomeScreen = ({ navigation }) => {
-  // If you still need to use useIsFocused, you can keep it
-  const isFocused = useIsFocused();
+const HomeScreen = ({ navigation, route }) => {
+  const [tasks, setTasks] = useState([]);
+  const [recentTask, setRecentTask] = useState(undefined); // Initialize recentTask to undefined
 
   // Get the current date
   const currentDate = new Date();
@@ -15,10 +15,33 @@ const HomeScreen = ({ navigation }) => {
   const month = currentDate.toLocaleDateString('en-US', { month: 'long' });
   const date = currentDate.getDate();
 
-  // Example: Check if there are tasks
-  const tasks = []; // Assume this is your tasks array
+  useEffect(() => {
+    if (route.params && route.params.newTask) {
+      setRecentTask(route.params.newTask); // Set the recent task when a new task is created
+    }
+  }, [route.params]);
 
-  // Add any navigation-related logic here
+  const markAsDone = (index) => {
+    Alert.alert(
+      'Mark as Done',
+      'Are you sure you want to mark this task as done?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            const updatedTasks = [...tasks];
+            updatedTasks.splice(index, 1);
+            setTasks(updatedTasks);
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: 'black', borderTopWidth: 0, paddingHorizontal: 30, paddingTop: 80 }}>
@@ -55,15 +78,25 @@ const HomeScreen = ({ navigation }) => {
           <FontAwesomeIcon icon={faSort} size={20} color="white" />
         </TouchableOpacity>
       </View>
-      {/* Conditionally render the rectangular card */}
-      {tasks.length === 0 ? (
-        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 30 }}>
-          <Text style={{ color: 'white', fontSize: 18 }}>No tasks for today</Text>
-        </View>
-      ) : (
-        <View style={{ backgroundColor: '#FFD700', width: '100%', height: 100, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 20, marginHorizontal: 5 }}>
-          <Text style={{ color: 'black', fontSize: 18 }}>Rectangular Card</Text>
-        </View>
+      {/* Display the most recent task if available */}
+      {recentTask && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#FFD700',
+            width: '100%',
+            height: 100,
+            borderRadius: 10,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 5
+          }}
+          onPress={() => console.log('Recent Task Card Pressed')}
+        >
+          <Text style={{ color: 'black', fontSize: 18 }}>Task Name: {recentTask.name}</Text>
+          <Text style={{ color: 'black', fontSize: 16 }}>Description: {recentTask.description}</Text>
+        </TouchableOpacity>
       )}
     </View>
   );

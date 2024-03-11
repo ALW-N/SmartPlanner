@@ -1,31 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Agenda } from 'react-native-calendars';
 
-export default function CalendarScreen({ navigation }) {
-  // Generate dummy items for a specific day
-  const generateDummyItems = () => {
-    // Simulate events on two specific days
-    return {
-      '2024-03-10': [
-        { time: '09:00', name: 'Morning Workout' },
-        { time: '10:00', name: 'Team Meeting via Zoom' },
-        { time: '12:00', name: 'Lunch with Sarah' },
-        { time: '15:00', name: 'Client Call' },
-        { time: '18:00', name: 'Dinner Prep' },
+export default function CalendarScreen({ navigation, route }) {
+  const [items, setItems] = useState({});
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Default to current date
+
+  // Function to update the items state with the task data
+  const updateItems = (taskData) => {
+    const date = taskData.startTime.toISOString().split('T')[0];
+
+    setItems((prevItems) => ({
+      ...prevItems,
+      [date]: [
+        ...(prevItems[date] ? prevItems[date] : []),
+        { time: taskData.startTime.toLocaleTimeString(), name: taskData.name },
       ],
-      '2024-03-11': [
-        { time: '08:00', name: 'Yoga Session' },
-        { time: '11:00', name: 'Project Discussion' },
-        { time: '13:00', name: 'Lunch' },
-        { time: '16:00', name: 'Coffee Break' },
-        { time: '19:00', name: 'Read a Book' },
-      ],
-      // Add more dates and events as needed
-    };
+    }));
   };
 
-  const items = generateDummyItems();
+  useEffect(() => {
+    // Check if route params contain task data
+    if (route.params && route.params.taskData) {
+      const taskData = route.params.taskData;
+      updateItems(taskData);
+    }
+  }, [route.params]);
 
   return (
     <View style={{ flex: 1, backgroundColor: 'black' }}>
@@ -45,7 +45,7 @@ export default function CalendarScreen({ navigation }) {
             calendarBackground: 'black',
           }}
           items={items}
-          selected={'2024-03-10'}
+          selected={selectedDate} // Set to the current date
           renderItem={(item, firstItemInDay) => (
             <View style={{ backgroundColor: '#333333', padding: 10, marginRight: 10, marginLeft: 10, marginTop: 17, borderRadius: 5 }}>
               <Text style={{ color: 'white' }}>{`${item.time} - ${item.name}`}</Text>

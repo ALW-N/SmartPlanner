@@ -1,3 +1,4 @@
+// AddTaskScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -69,11 +70,9 @@ const AddTaskScreen = ({ navigation, route }) => {
     const currentDate = selectedDate || selectedDate;
     setShowDatePicker(false);
 
-    // Get the current date
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set hours to 00:00:00
+    today.setHours(0, 0, 0, 0); 
 
-    // Check if selected date is in the past
     if (currentDate < today) {
       Alert.alert('Error', 'Please select a date in the future');
     } else {
@@ -86,25 +85,32 @@ const AddTaskScreen = ({ navigation, route }) => {
     setShowStartTimePicker(false);
     const currentDateTime = new Date();
 
-    // Check if selected start time is before the current time
     if (currentTime < currentDateTime) {
       Alert.alert('Error', 'Start time cannot be in the past. Please select a time from the current time onwards.');
     } else {
       setSelectedStartTime(currentTime);
-      updateTimeDuration(currentTime, selectedEndTime || new Date()); // Provide default value if selectedEndTime is null
+      updateTimeDuration(currentTime, selectedEndTime || new Date()); 
     }
   };
 
   const handleEndTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || selectedTime;
     setShowEndTimePicker(false);
-    setSelectedEndTime(currentTime);
-    updateTimeDuration(selectedStartTime || new Date(), currentTime); // Provide default value if selectedStartTime is null
+
+    if (currentTime < selectedStartTime) {
+      Alert.alert(
+        'Error',
+        'End time cannot be before the start time. Please select a time equal to or later than the start time.'
+      );
+    } else {
+      setSelectedEndTime(currentTime);
+      updateTimeDuration(selectedStartTime || new Date(), currentTime); 
+    }
   };
 
   const updateTimeDuration = (startTime, endTime) => {
     if (startTime && endTime) {
-      const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60); // Convert milliseconds to minutes
+      const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60); 
       const hours = Math.floor(duration / 60);
       const minutes = duration % 60;
       setTimeDuration(`${hours}:${minutes < 10 ? '0' : ''}${minutes}`);
@@ -128,10 +134,21 @@ const AddTaskScreen = ({ navigation, route }) => {
       return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
     }
   };
+  
 
   const handleCreateTask = () => {
-    // Implement the logic to create the task here
-    // This function will be called when the "Create Task" button is pressed
+    const task = {
+      category: selectedCategory,
+      name: selectedTask,
+      description: description,
+      startTime: selectedDate, // Assuming startTime is the date the task is assigned
+    };
+
+    // Update items state in CalendarScreen with the new task data
+    navigation.navigate('Calendar', { taskData: task });
+
+    // Navigate back to the Home screen with the new task data
+    navigation.navigate('Home', { newTask: task });
   };
 
   const styles = StyleSheet.create({
@@ -378,9 +395,9 @@ const AddTaskScreen = ({ navigation, route }) => {
         />
       </View>
 
-      {/* Subheading for Due Date and Estimate Task */}
+    
       <View style={styles.subHeadingContainer}>
-        <Text style={styles.dueDateHeading}>Due Date</Text>
+        <Text style={styles.dueDateHeading}>SelectDate</Text>
         <Text style={styles.estimateTaskHeading}>Estimate Task</Text>
       </View>
 
@@ -448,6 +465,7 @@ const AddTaskScreen = ({ navigation, route }) => {
           onChange={handleEndTimeChange}
         />
       )}
+      
 
     </View>
   );
