@@ -24,23 +24,44 @@ const AddTaskScreen = ({ navigation, route }) => {
   const [showEndTimePicker, setShowEndTimePicker] = useState(false); // State to control end time picker visibility
 
   // Function to handle creating the task
-const handleCreateTask = () => {
-  // Implement your logic here to create the task
-  // This function will be called when the "Create Task" button is pressed
-  // You can use the data stored in state variables like selectedCategory, selectedTask, description, startDate, endDate, startTime, endTime, etc.
-  // For now, let's just log the task details to the console
-  console.log('Task details:', {
-    selectedCategory,
-    selectedTask,
-    description,
-    startDate,
-    endDate,
-    startTime,
-    endTime,
-  });
-};
-
-
+  // Function to handle creating the task
+  const handleCreateTask = () => {
+    // Ensure that both start and end dates and times are selected
+    if (!startDate || !endDate || !startTime || !endTime) {
+      Alert.alert('Error', 'Please select start and end dates along with their times.');
+      return;
+    }
+  
+    // Ensure that end date is not before start date
+    if (endDate < startDate || (endDate.getTime() === startDate.getTime() && endTime < startTime)) {
+      Alert.alert('Error', 'End date and time cannot be before start date and time.');
+      return;
+    }
+  
+    // Create task object
+    let taskData;
+    if (endDate.getTime() === startDate.getTime()) {
+      // If start date and end date are the same, display task only for that date
+      taskData = {
+        name: selectedTask,
+        startTime: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startTime.getHours(), startTime.getMinutes()),
+        endTime: new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), endTime.getHours(), endTime.getMinutes()),
+        description: description
+      };
+    } else {
+      // If start date and end date are different, display task for each date in the range
+      taskData = {
+        name: selectedTask,
+        startTime: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startTime.getHours(), startTime.getMinutes()),
+        endTime: new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), endTime.getHours(), endTime.getMinutes()),
+        description: description
+      };
+    }
+  
+    // Navigate to CalendarScreen and pass task data
+    navigation.navigate('Calendar', { taskData: taskData });
+  };
+  
   // Effect hook to update selected category
   useEffect(() => {
     if (route.params && route.params.selectedCategory) {
