@@ -43,6 +43,7 @@ const AddTaskScreen = ({ navigation, route }) => {
     if (endDate.getTime() === startDate.getTime()) {
       // If start date and end date are the same, display task only for that date
       taskData = {
+        category: selectedCategory,
         name: selectedTask,
         startTime: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startTime.getHours(), startTime.getMinutes()),
         endTime: new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), endTime.getHours(), endTime.getMinutes()),
@@ -51,12 +52,14 @@ const AddTaskScreen = ({ navigation, route }) => {
     } else {
       // If start date and end date are different, display task for each date in the range
       taskData = {
+        category: selectedCategory,
         name: selectedTask,
         startTime: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startTime.getHours(), startTime.getMinutes()),
         endTime: new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), endTime.getHours(), endTime.getMinutes()),
         description: description
       };
     }
+    navigation.navigate('Home', { newTask: taskData });
   
     // Navigate to CalendarScreen and pass task data
     navigation.navigate('Calendar', { taskData: taskData });
@@ -189,30 +192,35 @@ const AddTaskScreen = ({ navigation, route }) => {
   };
 
   // Function to handle end time change
-  const handleEndTimeChange = (event, selectedTime) => {
-    const currentTime = selectedTime || endTime;
-    const currentDate = new Date(); // Current date
+  // Function to handle end time change
+const handleEndTimeChange = (event, selectedTime) => {
+  const currentTime = selectedTime || endTime;
+  const currentDate = new Date(); // Current date
 
-    if (startDate.getDate() === endDate.getDate() &&
-      startDate.getMonth() === endDate.getMonth() &&
-      startDate.getFullYear() === endDate.getFullYear()) {
-      // Start date and end date are the same
-      // Check if the selected time is in the past or equal to the start time
-      if (currentTime <= startTime) {
-        // If the selected time is in the past or equal to the start time, set it to the start time
-        setShowEndTimePicker(false);
-        setEndTime(new Date(startTime)); // Set end time to the same as start time
-      } else {
-        setShowEndTimePicker(false);
-        setEndTime(currentTime);
-      }
-    } else {
-      // Start date and end date are different
-      // Allow setting the end time to any time
+  if (
+    startDate.getDate() === endDate.getDate() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getFullYear() === endDate.getFullYear()
+  ) {
+    // Start date and end date are the same
+    // Check if the selected time is after the start time
+    if (currentTime > startTime) {
+      // If the selected time is after the start time, allow setting the end time
       setShowEndTimePicker(false);
       setEndTime(currentTime);
+    } else {
+      // If the selected time is before or equal to the start time, set it to the start time
+      setShowEndTimePicker(false);
+      setEndTime(new Date(startTime)); // Set end time to the same as start time
     }
-  };
+  } else {
+    // Start date and end date are different
+    // Allow setting the end time to any time
+    setShowEndTimePicker(false);
+    setEndTime(currentTime);
+  }
+};
+
 
   return (
     <View style={styles.container}>
