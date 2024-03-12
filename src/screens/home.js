@@ -9,13 +9,6 @@ const HomeScreen = ({ navigation, route }) => {
   const [selectedTask, setSelectedTask] = useState(null); // State to manage selected task
   const [modalVisible, setModalVisible] = useState(false); // State to manage modal visibility
 
-  // Get the current date
-  const currentDate = new Date();
-  // Get the day, month, and date
-  const day = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
-  const month = currentDate.toLocaleDateString('en-US', { month: 'long' });
-  const date = currentDate.getDate();
-
   useEffect(() => {
     if (route.params && route.params.newTask) {
       // Add the new task to the beginning of the tasks array
@@ -24,26 +17,13 @@ const HomeScreen = ({ navigation, route }) => {
     }
   }, [route.params]);
 
-  const markAsDone = (index) => {
-    Alert.alert(
-      'Mark as Done',
-      'Are you sure you want to mark this task as done?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: () => {
-            const updatedTasks = [...tasks];
-            updatedTasks.splice(index, 1);
-            setTasks(updatedTasks);
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+  const toggleTaskCompletion = (index) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].completed = !updatedTasks[index].completed; // Toggle completion status
+    // Move completed task to the bottom
+    const completedTask = updatedTasks.splice(index, 1)[0];
+    updatedTasks.push(completedTask);
+    setTasks(updatedTasks);
   };
 
   // Function to handle when a task is pressed
@@ -63,7 +43,7 @@ const HomeScreen = ({ navigation, route }) => {
       {/* Display the current day, month, and date */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <View>
-          <Text style={{ color: 'white', fontSize: 18, marginBottom: 10 }}>{`${day}, ${month} ${date}`}</Text>
+          {/* Removed day, month, and date display */}
           <Text style={{ color: 'white', fontSize: 24 }}>Hey Alwin 🙋‍♂️</Text>
         </View>
         {/* Notification Bell Icon */}
@@ -93,26 +73,36 @@ const HomeScreen = ({ navigation, route }) => {
           <FontAwesomeIcon icon={faSort} size={20} color="white" />
         </TouchableOpacity>
       </View>
-      {/* Display the most recent task if available */}
-      {recentTask && (
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#FFD700',
-            width: '100%',
-            height: 100,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 10,
-            marginTop: 10,
-            marginHorizontal: 5
-          }}
-          onPress={() => handleTaskPress(recentTask)} // Pass the recent task to handleTaskPress function
-        >
-          <Text style={{ color: 'black', fontSize: 18 }}>Task Name: {recentTask.name}</Text>
-          <Text style={{ color: 'black', fontSize: 16 }}>Description: {recentTask.description}</Text>
-        </TouchableOpacity>
-      )}
+    
+      {/* List of tasks */}
+      <ScrollView style={{ flex: 1 }}>
+        {tasks.map((task, index) => (
+          // Render each task as a TouchableOpacity
+          <TouchableOpacity
+            key={index}
+            style={{
+              backgroundColor: task.completed ? '#808080' : '#FFD700',
+              width: '100%',
+              height: 100,
+              borderRadius: 10,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 10,
+              marginTop: 10,
+              marginHorizontal: 5
+            }}
+            onPress={() => handleTaskPress(task)} // Pass the task to handleTaskPress function
+          >
+            <Text style={{ color: 'black', fontSize: 18 }}>{task.name}</Text>
+            <Text style={{ color: 'black', fontSize: 16 }}>{task.description}</Text>
+            {/* Radio button to mark/unmark task as done */}
+            <TouchableOpacity onPress={() => toggleTaskCompletion(index)} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+              <View style={[styles.radioButton, { backgroundColor: task.completed ? 'green' : 'red' }]} />
+              <Text style={{ color: 'black', marginLeft: 5 }}>{task.completed ? 'Mark as Undone' : 'Mark as Done'}</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
       {/* Modal for displaying task details */}
       <Modal
@@ -180,6 +170,14 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'black',
+    marginRight: 10
   },
 });
 
