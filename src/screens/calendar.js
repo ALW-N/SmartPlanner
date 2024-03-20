@@ -1,39 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { Agenda } from 'react-native-calendars';
-
-// Function to generate random tasks for February
-const generateRandomTasks = () => {
-  const categories = ["Academics/Profession", "Personal", "Social", "General"];
-  const tasks = [];
-  const analyticsData = {}; // Object to store analytics data
-
-  // Generate random tasks for each day in February
-  for (let day = 1; day <= 28; day++) {
-    const date = new Date(2024, 1, day); // Year 2024, Month February (0-indexed), Day 'day'
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const taskCount = Math.floor(Math.random() * 5) + 1; // Generate between 1 to 5 tasks per day
-
-    for (let i = 0; i < taskCount; i++) {
-      // Generate random start and end times for the task
-      const startTime = new Date(date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60), 0, 0));
-      const endTime = new Date(date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60), 0, 0));
-
-      tasks.push({
-        startTime: startTime,
-        endTime: endTime,
-        name: `Task ${i + 1}`,
-        category: category,
-      });
-    }
-  }
-
-  return tasks;
-};
+import hardcodedTasks from './hardcodedTasks'; // Import hardcoded tasks
 
 const CalendarScreen = ({ navigation, route }) => {
   const [items, setItems] = useState({});
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Default to current date
+
+  useEffect(() => {
+    // Update items with hardcoded tasks data
+    updateItems(hardcodedTasks);
+  }, []); // Empty dependency array to run the effect only once
 
   // Function to update the items state with the task data
   const updateItems = (taskData) => {
@@ -77,15 +54,12 @@ const CalendarScreen = ({ navigation, route }) => {
     });
   };
 
+
+  // Handle newly created task data passed from AddTaskScreen
   useEffect(() => {
-    // Generate random tasks for February
-    const tasks = generateRandomTasks();
-    updateItems(tasks);
-    
-    // Check if there is new task data passed from AddTaskScreen
     if (route.params && route.params.taskData) {
       const newTaskData = route.params.taskData;
-      updateItems([newTaskData]); // Update items with the new task data
+      updateItems([newTaskData, ...hardcodedTasks]); // Update items with the new task data along with hardcoded tasks
     }
   }, [route.params]); // Include route.params in the dependency array
 
@@ -102,11 +76,10 @@ const CalendarScreen = ({ navigation, route }) => {
           items={items}
           selected={selectedDate}
           renderItem={(item, firstItemInDay) => (
-            // Render your agenda item
-            <View>
-              <Text>{item.name}</Text>
-              <Text>Start Time: {new Date(item.startTime).toLocaleTimeString()}</Text>
-              <Text>End Time: {new Date(item.endTime).toLocaleTimeString()}</Text>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{item.name}</Text>
+              <Text style={styles.cardText}>Start Time: {new Date(item.startTime).toLocaleTimeString()}</Text>
+              <Text style={styles.cardText}>End Time: {new Date(item.endTime).toLocaleTimeString()}</Text>
             </View>
           )}
         />
@@ -114,5 +87,29 @@ const CalendarScreen = ({ navigation, route }) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginTop: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  cardText: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+});
 
 export default CalendarScreen;

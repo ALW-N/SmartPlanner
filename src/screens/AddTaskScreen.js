@@ -192,34 +192,28 @@ const AddTaskScreen = ({ navigation, route }) => {
   };
 
   // Function to handle end time change
-  // Function to handle end time change
-const handleEndTimeChange = (event, selectedTime) => {
-  const currentTime = selectedTime || endTime;
-  const currentDate = new Date(); // Current date
-
-  if (
-    startDate.getDate() === endDate.getDate() &&
-    startDate.getMonth() === endDate.getMonth() &&
-    startDate.getFullYear() === endDate.getFullYear()
-  ) {
-    // Start date and end date are the same
-    // Check if the selected time is after the start time
-    if (currentTime > startTime) {
-      // If the selected time is after the start time, allow setting the end time
+  const handleEndTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || endTime;
+    const currentDate = new Date();
+  
+    if (
+      startDate.getDate() === endDate.getDate() &&
+      startDate.getMonth() === endDate.getMonth() &&
+      startDate.getFullYear() === endDate.getFullYear()
+    ) {
+      if (currentTime >= startTime) {
+        setShowEndTimePicker(false);
+        setEndTime(currentTime);
+      } else {
+        setShowEndTimePicker(false);
+        setEndTime(new Date(startTime));
+      }
+    } else {
       setShowEndTimePicker(false);
       setEndTime(currentTime);
-    } else {
-      // If the selected time is before or equal to the start time, set it to the start time
-      setShowEndTimePicker(false);
-      setEndTime(new Date(startTime)); // Set end time to the same as start time
     }
-  } else {
-    // Start date and end date are different
-    // Allow setting the end time to any time
-    setShowEndTimePicker(false);
-    setEndTime(currentTime);
-  }
-};
+  };
+  
 
 
   return (
